@@ -2,9 +2,9 @@
 #include <stdlib.h>
 
 // MACROS
-#define RUNNING 0;
-#define READY 1;
-#define WAITING 2;
+#define RUNNING 0
+#define READY 1
+#define WAITING 2
 
 // NODE STRUCTURE
 struct Node {
@@ -36,11 +36,12 @@ struct Node* dequeue(struct Queue* queue);
 struct Node* dequeue_any(struct Queue* queue, int task_id);
 void print_queue(struct Queue* queue);
 void print_node(struct Node* node);
+char* get_task_state(int task_state);
 int is_unique_task_id(struct Queue* queue, int task_id);
 void event_trigger(struct Queue* waiting_queue,struct Queue* ready_queue, int event_id);
-void suspend_event(struct Queue* queue, int event_id);
+void suspend_event(struct Node* running_node, struct Queue* ready_queue, int event_id);
 void read_initial_state(struct Queue* queue, char* file_name);
-void move_ready_to_waiting(struct Queue* ready_queue,struct Queue* waiting_queue, int task_id);
+void move_ready_to_waiting(struct Queue* ready_queue,struct Queue* waiting_queue, int task_id, int event_id);
 void free_up_memory(struct Queue* queue);
 void sort_queue(struct Queue* queue);
 
@@ -67,33 +68,31 @@ int main(){
     struct Node* running_node = NULL;
 
     // Reading the initial state of the tasks from the file
-    
+    read_initial_state(ready_queue, "initial_state.txt");
+    read_initial_state(waiting_queue, "initial_state.txt");
+
+    // Printing commands for the user
+    printf("==================================================================\n");
+    printf("Commands available\n");
+    printf("n task_id          – Add/create new task\n");
+    printf("d task_id          – Delete task from the Ready/Waiting queue\n");
+    printf("w task_id event_id – Move task from Ready to Waiting queue\n");
+    printf("e event_id         – Trigger the event of event_id\n");
+    printf("s event_id         – Suspend running task with event_id\n");
+    printf("q                  – Quit the program\n");
+    printf("==================================================================\n");
 
     // MAIN LOOP
 
     while(1){
-
-        // Printing commands for the user
-        printf("==================================================================\n");
-        printf("Commands available\n");
-        printf("n task_id          – Add/create new task\n");
-        printf("d task_id          – Delete task from the Ready/Waiting queue\n");
-        printf("w task_id event_id – Move task from Ready to Waiting queue\n");
-        printf("e event_id         – Trigger the event of event_id\n");
-        printf("s event_id         – Suspend running task with event_id\n");
-        printf("q                  – Quit the program\n");
-        printf("==================================================================\n");
-        
         // Taking command from the user as string
         char command[30];
         printf("Enter the command: ");
         scanf("%s", command);
 
         // Checking the command and performing the required operation
-        
-        
+        run_command(command, ready_queue, waiting_queue, running_node);
     }
-    
 
     return 0;
 }
@@ -211,10 +210,11 @@ struct Node* dequeue(struct Queue* queue){
 
 // This function will print a node
 void print_node(struct Node* node){
-    printf("Task ID: %d\n", node->task_id);
-    printf("Task State: %d\n", node->task_state);
-    printf("Event ID: %d\n", node->event_id);
-    printf("Context Pointer: %p\n", node->ptr_context);
+    char* task_state = get_task_state(node->task_state);
+    printf("Task ID: %d\t", node->task_id);
+    printf("Task State: %s\t", task_state);
+    printf("Event ID: %d\t", node->event_id);
+    // printf("Context Pointer: %p\n", node->ptr_context);
     printf("\n");
 }
 
@@ -229,6 +229,25 @@ void print_queue(struct Queue* queue){
             print_node(temp);
             temp = temp->next;
         }
+    }
+}
+
+// This function will return the task state in string format
+char* get_task_state(int task_state){
+    switch (task_state)
+    {
+    case RUNNING:
+        return "RUNNING";
+        break;
+    case READY:
+        return "READY";
+        break;
+    case WAITING:
+        return "WAITING";
+        break;
+    default:
+        return "INVALID";
+        break;
     }
 }
 
@@ -251,33 +270,42 @@ int is_unique_task_id(struct Queue* queue, int task_id){
 
 // This function will trigger the event
 void event_trigger(struct Queue* waiting_queue, struct Queue* ready_queue, int event_id){
-    if(is_empty(waiting_queue)){
-        printf("Waiting queue is empty.\n");
-    }
-    else{
-        struct Node* temp = waiting_queue->head;
-        while(temp != NULL){
-            if(temp->event_id == event_id){
-                temp->task_state = READY;
+   
+    // if the event is triggered then the task will be moved to ready queue
+    struct Node* temp = waiting_queue->head;
+    struct Node* prev = NULL;
+    while(temp != NULL){
+        if(temp->event_id == event_id){
+            temp->task_state = READY;
+            if(prev == NULL){
+                waiting_queue->head = waiting_queue->head->next;
+                enqueue_sorted(ready_queue, temp);
+                temp = waiting_queue->head;
             }
+            else{
+                prev->next = temp->next;
+                enqueue_sorted(ready_queue, temp);
+                temp = prev->next;
+            }
+        }
+        else{
+            prev = temp;
             temp = temp->next;
         }
     }
+    printf("Event %d is triggered.\n", event_id);
 }
 
 // This function will suspend the event 
-void suspend_event(struct Queue* queue, int event_id){
-    if(is_empty(queue)){
-        printf("Queue is empty.\n");
+void suspend_event(struct Node* running_node, struct Queue* ready_queue, int event_id){
+    // if given task id is running . shift it to ready queue
+    if(running_node->event_id == event_id){
+        running_node->task_state = READY;
+        enqueue_sorted(ready_queue, running_node);
+        printf("Task ( ID: %d ) is suspended.\n", running_node->task_id);
     }
     else{
-        struct Node* temp = queue->head;
-        while(temp != NULL){
-            if(temp->event_id == event_id){
-                temp->task_state = WAITING;
-            }
-            temp = temp->next;
-        }
+        printf("ERROR: Entered task is not running. Task can not be suspended.\n");
     }
 }
 
@@ -285,14 +313,17 @@ void suspend_event(struct Queue* queue, int event_id){
 
 
 // This function will move the ready task to waiting queue
-void move_ready_to_waiting(struct Queue* ready_queue, struct Queue* waiting_queue, int task_id){
+void move_ready_to_waiting(struct Queue* ready_queue, struct Queue* waiting_queue, int task_id, int event_id){
     struct Node* node = dequeue_any(ready_queue, task_id);
     if(node == NULL){
         printf("Task is not in ready queue.\n");
     }
     else{
         node->task_state = WAITING;
+        node->event_id = event_id;
         enqueue(waiting_queue, node);
+        printf("Following task was moved from ready queue to waiting queue.\n");
+        print_node(node);
     }
 }
 
@@ -342,82 +373,118 @@ void sort_queue(struct Queue* queue){
     }
 }
 
-// This function will validate the command given by the user
-int validate_command(char* command){
+// This function will validate command and will run it as given by the user
+void run_command(char* command, struct Queue* ready_queue, struct Queue* waiting_queue, struct Node* running_node){
 
-    if (command[1] != ' ')  // check if there is a space after the command
+    switch (command[0])
     {
-        printf("Invalid command.\n");
-        return 0;
-    }
-    
+    case 'n':
+        int task_id;
+        if (sscanf(command, "n %d", &task_id) == 1)
+        {
+            if (is_unique_task_id(ready_queue, task_id) && is_unique_task_id(waiting_queue, task_id) && running_node->task_id != task_id)
+            {
+                struct Node* node = create_node(task_id, READY, 0);
+                enqueue_sorted(ready_queue, node);
+            }
+            else
+            {   
+                printf("Task ID is not unique.\n");
+            }
+        }
+        else
+        {
+            printf("ERROR: Invalid command.\n");
+        }
+        break;
 
-    if(command[0] == 'n' || command[0] == 'd'){
-        if(command[2] == '\0'){
-            printf("Invalid command.\n");
-            return 0;
-        }
-        else{
-            int i = 2;
-            while(command[i] != '\0'){
-                if(command[i] < '0' || command[i] > '9'){
-                    printf("Invalid command: Task ID must be a positive integer.\n");
-                    return 0;
+    case 'd':
+        int task_id;
+        if (sscanf(command, "d %d", &task_id) == 1)
+        {
+            struct Node* node = dequeue_any(ready_queue, task_id);
+            if (node == NULL)
+            {
+                node = dequeue_any(waiting_queue, task_id);
+                if (node == NULL)
+                {
+                   if (running_node->task_id == task_id)
+                   {
+                       printf("Entered task is running. Can not be delete.\n");
+                   }
+                   else
+                   {
+                       printf("Task is not in any queue.\n");
+                   }
                 }
-                i++;
+                else
+                {
+                    char* task_state = get_task_state(node->task_state);
+                    printf("Following task was deleted from waiting queue.\n");
+                    print_node(node);
+                    free(node);
+                }
+            }
+            else
+            {   
+                char* task_state = get_task_state(node->task_state);
+                printf("Following task was deleted from waiting queue.\n");
+                print_node(node);
+                free(node);
             }
         }
-    }
-    else if(command[0] == 'w'){
-        if(command[2] == '\0'){
-            printf("Invalid command.\n");
-            return 0;
-        }
-        else{
-            int i = 1;
-            int space_count = 0; // count occurance of white space 
-            while(command[i] != '\0'){
-                if(command[i] < '0' || command[i] > '9'){
-                    printf("Invalid command: Task ID and/or Event ID must be a positive integer.\n");
-                    return 0;
-                }else if(command[i] == ' '){
-                    space_count++;
-                    if (space_count > 1)
-                    {
-                        printf("Invalid command.\n");
-                        return 0;
-                    }
-                }
-                i++;
-            }
-        }
-    }
-    else if(command[0] == 'e' || command[0] == 's'){
-        if(command[2] == '\0'){
-            printf("Invalid command.\n");
-            return 0;
-        }
-        else{
-            int i = 2;
-            while(command[i] != '\0'){
-                if(command[i] < '0' || command[i] > '9'){
-                    printf("Event ID must be a positive integer.\n");
-                    return 0;
-                }
-                i++;
-            }
-        }
-    }
-    else if(command[0] == 'q'){
-        if(command[1] != '\0'){
-            printf("Invalid command.\n");
-            return 0;
-        }
-    }
-    else{
-        printf("Invalid command.\n");
-        return 0;
-    }
+        else
+        {
+            printf("ERROR: Invalid command.\n");
+        }   
+        break; 
 
-    return 1;
+    case 'w':
+        int task_id, event_id;
+        if (sscanf(command, "w %d %d", &task_id, &event_id) == 2)
+        {
+            move_ready_to_waiting(ready_queue, waiting_queue, task_id, event_id);
+        }
+        else
+        {
+            printf("ERROR: Invalid command.\n");
+        }   
+        break;
+
+    case 'e':
+        int event_id;
+        if (sscanf(command, "e %d", &event_id) == 1)
+        {
+            event_trigger(waiting_queue, ready_queue, event_id);
+        }
+        else
+        {
+            printf("ERROR: Invalid command.\n");
+        }
+        break;
+
+    case 's':
+        int event_id;
+        if (sscanf(command, "s %d", &event_id) == 1)
+        {
+            suspend_event(running_node, ready_queue, event_id);
+        }
+        else
+        {
+            printf("ERROR: Invalid command.\n");
+        }
+
+        break;
+
+    case 'q':
+        printf("Quitting the program.\n");
+        free_up_memory(ready_queue);
+        free_up_memory(waiting_queue);
+        free(running_node);
+        exit(0);
+        break;
+
+    default:  // this case will never occur
+        break; 
+    }
 }
