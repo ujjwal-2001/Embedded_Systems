@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 // MACROS
 #define RUNNING 0
@@ -46,13 +47,7 @@ void free_up_memory(struct Queue* queue);
 void sort_queue(struct Queue* queue);
 
 // declaration of functions which will implement the commands as per the requirement
-// Console:
-// n task_id– Add/create new task
-// d task_id– Delete task from the Ready/Waiting queue
-// w task_id event_id – Move task from Ready to Waiting queue
-// e event_id – Trigger the event of event_id
-// s event_id – Suspend running task with event_id
-int validate_command(char* command);
+void print_commands();
 void run_command(char* command, struct Queue* ready_queue, struct Queue* waiting_queue, struct Node* running_node);
 
 // MAIN FUNCTION
@@ -72,15 +67,7 @@ int main(){
     read_initial_state(waiting_queue, "initial_state.txt");
 
     // Printing commands for the user
-    printf("==================================================================\n");
-    printf("Commands available\n");
-    printf("n task_id          – Add/create new task\n");
-    printf("d task_id          – Delete task from the Ready/Waiting queue\n");
-    printf("w task_id event_id – Move task from Ready to Waiting queue\n");
-    printf("e event_id         – Trigger the event of event_id\n");
-    printf("s event_id         – Suspend running task with event_id\n");
-    printf("q                  – Quit the program\n");
-    printf("==================================================================\n");
+    print_commands();
 
     // MAIN LOOP
 
@@ -92,6 +79,18 @@ int main(){
 
         // Checking the command and performing the required operation
         run_command(command, ready_queue, waiting_queue, running_node);
+
+        // Printing the ready and waiting queue
+        printf("*******************************************************************\n");
+        printf("Ready Queue:\n");
+        print_queue(ready_queue);
+        printf("*******************************************************************\n");
+        printf("Waiting Queue:\n");
+        print_queue(waiting_queue);
+        printf("*******************************************************************\n");
+        printf("Running Task:\n");
+        print_node(running_node);
+        printf("*******************************************************************\n");
     }
 
     return 0;
@@ -373,11 +372,34 @@ void sort_queue(struct Queue* queue){
     }
 }
 
+// This function will print the commands
+void print_commands(){
+    printf("==================================================================\n");
+    printf("Commands available are :-\n");
+    printf("l                  – Lists all available commands\n");
+    printf("n task_id          – Add/create new task\n");
+    printf("d task_id          – Delete task from the Ready/Waiting queue\n");
+    printf("w task_id event_id – Move task from Ready to Waiting queue\n");
+    printf("e event_id         – Trigger the event of event_id\n");
+    printf("s event_id         – Suspend running task with given event_id\n");
+    printf("q                  – Quits the program\n");
+    printf("==================================================================\n");
+}
+
 // This function will validate command and will run it as given by the user
 void run_command(char* command, struct Queue* ready_queue, struct Queue* waiting_queue, struct Node* running_node){
 
     switch (command[0])
     {
+    case 'l':
+        if (command[1] == '\0')
+        {
+            print_commands();
+        }else{
+            printf("ERROR: Invalid command.\n");
+        }
+        
+        break;
     case 'n':
         int task_id;
         if (sscanf(command, "n %d", &task_id) == 1)
