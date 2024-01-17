@@ -17,7 +17,7 @@ struct Node {
     int task_state;
     int event_id;
     struct Node* next;
-}running_node;
+};
 
 // QUEUE STRUCTURE
 
@@ -43,11 +43,11 @@ char* get_task_state(int task_state);
 void print_system_tasks(struct Queue* ready_queue, struct Queue* waiting_queue, struct Node* running_node);
 int is_unique_task_id(struct Queue* queue, int task_id);
 void event_trigger(struct Queue* waiting_queue,struct Queue* ready_queue, int event_id);
-void suspend_event(struct Node* running_node, struct Queue* ready_queue, int event_id);
+void suspend_event(struct Node* running_node, struct Queue* ready_queue, struct Queue* waiting_queue, int event_id);
 void read_initial_state(struct Queue* waiting_queue, struct Queue* ready_queue, char* file_name);
 void move_ready_to_waiting(struct Queue* ready_queue,struct Queue* waiting_queue, int task_id, int event_id);
+struct Node* update_running_node(struct Node* running_node, struct Queue* ready_queue);
 void free_up_memory(struct Queue* queue);
-void sort_queue(struct Queue* queue);
 
 // declaration of functions which will implement the commands as per the requirement
 void print_commands();
@@ -63,11 +63,12 @@ int main(){
     struct Queue* waiting_queue = create_queue();
 
     // Creating pointer that points to the running node
-    struct Node* running_node = NULL;
+    struct Node* running_node = (struct Node*)malloc(sizeof(struct Node));
 
     // Reading the initial state of the tasks from the file
     read_initial_state(waiting_queue, ready_queue, "init_tasks.txt");
-    running_node = dequeue(ready_queue);   
+    running_node = dequeue(ready_queue);  
+    running_node->task_state = RUNNING; 
 
     // Printing initial state
     printf("+++++++++++++++++++++ INITIAL STATE OF QUEUES +++++++++++++++++++++\n");
@@ -91,6 +92,9 @@ int main(){
 
         // Checking the command and performing the required operation
         run_command(command, ready_queue, waiting_queue, running_node);
+        printf("________ DEBUG _________");
+        print_system_tasks(ready_queue, waiting_queue, running_node);
+        running_node = update_running_node(running_node, ready_queue);
         printf("\n\n\n");
     }
 
@@ -214,8 +218,8 @@ struct Node* dequeue(struct Queue* queue){
 void print_node(struct Node* node){
     char* task_state = get_task_state(node->task_state);
     printf("Task ID: %d\t", node->task_id);
-    printf("Task Priority: %d\t", node->task_pri);
-    printf("Task State: %s\t", task_state);
+    printf("Priority: %d\t", node->task_pri);
+    printf("State: %s\t", task_state);
     printf("Event ID: %d\t", node->event_id);
     // printf("Context Pointer: %p\n", node->ptr_context);
     printf("\n");
@@ -317,15 +321,25 @@ void event_trigger(struct Queue* waiting_queue, struct Queue* ready_queue, int e
 }
 
 // This function will suspend the event 
-void suspend_event(struct Node* running_node, struct Queue* ready_queue, int event_id){
-    // if given task id is running . shift it to ready queue
+void suspend_event(struct Node* running_node, struct Queue* ready_queue, struct Queue* waiting_queue, int event_id){
+    // if given task id is running . shift it to waiting queue
     if(running_node->event_id == event_id){
-        running_node->task_state = READY;
-        enqueue_sorted(ready_queue, running_node);
+        running_node->task_state = WAITING;
+        enqueue(waiting_queue, running_node);
         printf("Task ( ID: %d ) is suspended.\n", running_node->task_id);
+
+        // if ready queue is not empty then shift the first task to running state
+        if(!is_empty(ready_queue)){
+            struct Node* node = dequeue(ready_queue);
+            node->task_state = RUNNING;
+            running_node = node;
+        }
+        else{
+            running_node = NULL;
+        }
     }
     else{
-        printf("ERROR: Entered task is not running. Task can not be suspended.\n");
+        printf("ERROR: Entered event ID is not of running task. Task can not be suspended.\n");
     }
 }
 
@@ -339,7 +353,7 @@ void read_initial_state(struct Queue* waiting_queue, struct Queue* ready_queue, 
         char line[100];
         while(fgets(line, 100, file) != NULL){
             int task_id, task_pri, task_state, event_id;
-            if(sscanf(line, "%d,%d,%d,%d", &task_id, &task_pri, &task_state, &event_id) == 3){
+            if(sscanf(line, "%d,%d,%d,%d", &task_id, &task_pri, &task_state, &event_id) == 4){
                 struct Node* node = create_node(task_id, task_pri, task_state, event_id);
                 if(task_state == READY){
                     enqueue_sorted(ready_queue, node);
@@ -356,15 +370,16 @@ void read_initial_state(struct Queue* waiting_queue, struct Queue* ready_queue, 
     }
 }
 
-// This function will move the ready task to waiting queue
+// This function will move a task from ready to waiting queue
 void move_ready_to_waiting(struct Queue* ready_queue, struct Queue* waiting_queue, int task_id, int event_id){
     struct Node* node = dequeue_any(ready_queue, task_id);
     if(node == NULL){
-        printf("Task is not in ready queue.\n");
+        printf("WARNING: Task is not in ready queue.\n");
     }
     else{
         node->task_state = WAITING;
         node->event_id = event_id;
+        node->next = NULL;
         enqueue(waiting_queue, node);
         printf("Following task was moved from ready queue to waiting queue.\n");
         print_node(node);
@@ -386,13 +401,35 @@ void free_up_memory(struct Queue* queue){
     }
 }
 
+// This function will update the running node
+struct Node* update_running_node(struct Node* running_node, struct Queue* ready_queue){
+    if(running_node != NULL && !is_empty(ready_queue) ){
+        if(running_node->task_pri > ready_queue->head->task_pri){
+            struct Node* node = dequeue(ready_queue);
+            node->task_state = RUNNING;
+            running_node->task_state = READY;
+            enqueue_sorted(ready_queue, running_node);
+            running_node = node;
+        }
+    }else if(running_node == NULL && !is_empty(ready_queue)){
+        struct Node* node = dequeue(ready_queue);
+        node->task_state = RUNNING;
+        node->next = NULL;
+        running_node = node;
+    }else if(running_node == NULL && is_empty(ready_queue)){
+        running_node = NULL;
+    }
+
+    return running_node;
+}
+
 // This function will print the commands
 void print_commands(){
     printf("==================================================================\n");
     printf("Commands available are :-\n");
     printf("l                  - Lists all available commands\n");
     printf("p                  - Prints ready and waiting queue with running task info\n");
-    printf("n task_id          - Add/create new task\n");
+    printf("n task_id task_pri - Adds/creates a new task with given ID and priority\n");
     printf("d task_id          - Delete task from the Ready/Waiting queue\n");
     printf("w task_id event_id - Move task from Ready to Waiting queue\n");
     printf("e event_id         - Trigger the event of event_id\n");
@@ -426,18 +463,19 @@ void run_command(char* command, struct Queue* ready_queue, struct Queue* waiting
         break;
     case 'n':{
         int task_id, task_pri;
-        if (sscanf(command, "n %d %d", &task_id, &task_pri) == 1)
+        if (sscanf(command, "n %d %d", &task_id, &task_pri) == 2)
         {   
             if (is_unique_task_id(ready_queue, task_id) && is_unique_task_id(waiting_queue, task_id) && running_node->task_id != task_id)
             {
                 struct Node* node = create_node(task_id, task_pri, READY, DEFAULT_EVENT_ID);
+
                 enqueue_sorted(ready_queue, node);
-                printf("New task is created: ");
+                printf("New task is created:-\n ");
                 print_node(node);
             }
             else
             {   
-                printf("Task ID is not unique.\n");
+                printf("Task ID must be unique.\n");
             }
         }
         else
@@ -519,7 +557,7 @@ void run_command(char* command, struct Queue* ready_queue, struct Queue* waiting
         int event_id;
         if (sscanf(command, "s %d", &event_id) == 1)
         {
-            suspend_event(running_node, ready_queue, event_id);
+            suspend_event(running_node, ready_queue, waiting_queue, event_id);
         }
         else
         {
