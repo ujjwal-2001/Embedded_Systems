@@ -7,9 +7,12 @@
 #define READY 1
 #define WAITING 2
 
+#define DEFAULT_EVENT_ID 0
+
 // NODE STRUCTURE
 struct Node {
     int task_id;
+    int task_pri;
     int* ptr_context;
     int task_state;
     int event_id;
@@ -28,7 +31,7 @@ struct Queue {
 // queue functions
 
 struct Queue* create_queue();
-struct Node* create_node(int task_id, int task_state, int event_id);
+struct Node* create_node(int task_id, int task_pri, int task_state, int event_id);
 int is_empty(struct Queue* queue);
 void enqueue(struct Queue* queue, struct Node* node);
 void enqueue_sorted(struct Queue* queue, struct Node* node);
@@ -105,9 +108,10 @@ struct Queue* create_queue(){
 }
 
 // This function will create a node for queue and return it
-struct Node* create_node(int task_id, int task_state, int event_id){
+struct Node* create_node(int task_id,int task_pri, int task_state, int event_id){
     struct Node* node = (struct Node*)malloc(sizeof(struct Node));
     node->task_id = task_id;
+    node->task_pri = task_pri;
     node->ptr_context = NULL;
     node->task_state = task_state;
     node->event_id = event_id;
@@ -137,7 +141,8 @@ void enqueue(struct Queue* queue, struct Node* node){
     }
 }
 
-// This function will add a node to the queue in sorted order (ascending order)
+// This function will add a node to the queue in sorted order according 
+// to task priority (ascending order)
 void enqueue_sorted(struct Queue* queue, struct Node* node){
     if(is_empty(queue)){
         queue->head = node;
@@ -147,7 +152,7 @@ void enqueue_sorted(struct Queue* queue, struct Node* node){
         struct Node* temp = queue->head;
         struct Node* prev = NULL;
         while(temp != NULL){
-            if(temp->task_id > node->task_id){
+            if(temp->task_pri > node->task_pri){
                 if(prev == NULL){
                     node->next = queue->head;
                     queue->head = node;
@@ -162,7 +167,7 @@ void enqueue_sorted(struct Queue* queue, struct Node* node){
             prev = temp;
             temp = temp->next;
         }
-        prev->next = node;
+        queue->tail->next = node;
         queue->tail = node;
     }
 }
@@ -209,6 +214,7 @@ struct Node* dequeue(struct Queue* queue){
 void print_node(struct Node* node){
     char* task_state = get_task_state(node->task_state);
     printf("Task ID: %d\t", node->task_id);
+    printf("Task Priority: %d\t", node->task_pri);
     printf("Task State: %s\t", task_state);
     printf("Event ID: %d\t", node->event_id);
     // printf("Context Pointer: %p\n", node->ptr_context);
@@ -332,9 +338,9 @@ void read_initial_state(struct Queue* waiting_queue, struct Queue* ready_queue, 
     else{
         char line[100];
         while(fgets(line, 100, file) != NULL){
-            int task_id, task_state, event_id;
-            if(sscanf(line, "%d %d %d", &task_id, &task_state, &event_id) == 3){
-                struct Node* node = create_node(task_id, task_state, event_id);
+            int task_id, task_pri, task_state, event_id;
+            if(sscanf(line, "%d,%d,%d,%d", &task_id, &task_pri, &task_state, &event_id) == 3){
+                struct Node* node = create_node(task_id, task_pri, task_state, event_id);
                 if(task_state == READY){
                     enqueue_sorted(ready_queue, node);
                 }
@@ -380,43 +386,6 @@ void free_up_memory(struct Queue* queue){
     }
 }
 
-// This function will sort the queue according to the task id (ascending order)
-void sort_queue(struct Queue* queue){
-    if(is_empty(queue)){
-        printf("Queue is empty.\n");
-    }
-    else{
-        struct Node* temp = queue->head;
-        struct Node* prev = NULL;
-        while(temp != NULL){
-            struct Node* temp2 = temp->next;
-            struct Node* prev2 = temp;
-            while(temp2 != NULL){
-                if(temp->task_id > temp2->task_id){
-                    if(prev == NULL){
-                        queue->head = temp2;
-                        prev2->next = temp;
-                        temp->next = temp2->next;
-                        temp2->next = temp2;
-                        temp2 = temp->next;
-                    }
-                    else{
-                        prev->next = temp2;
-                        prev2->next = temp;
-                        temp->next = temp2->next;
-                        temp2->next = temp2;
-                        temp2 = temp->next;
-                    }
-                }
-                prev2 = temp2;
-                temp2 = temp2->next;
-            }
-            prev = temp;
-            temp = temp->next;
-        }
-    }
-}
-
 // This function will print the commands
 void print_commands(){
     printf("==================================================================\n");
@@ -456,13 +425,12 @@ void run_command(char* command, struct Queue* ready_queue, struct Queue* waiting
     }   
         break;
     case 'n':{
-        int task_id;
-        if (sscanf(command, "n %d", &task_id) == 1)
+        int task_id, task_pri;
+        if (sscanf(command, "n %d %d", &task_id, &task_pri) == 1)
         {   
-            printf("deer : %d", task_id);
             if (is_unique_task_id(ready_queue, task_id) && is_unique_task_id(waiting_queue, task_id) && running_node->task_id != task_id)
             {
-                struct Node* node = create_node(task_id, READY, 0);
+                struct Node* node = create_node(task_id, task_pri, READY, DEFAULT_EVENT_ID);
                 enqueue_sorted(ready_queue, node);
                 printf("New task is created: ");
                 print_node(node);
