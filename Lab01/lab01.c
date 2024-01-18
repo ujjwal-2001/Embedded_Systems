@@ -63,7 +63,7 @@ int main(){
     struct Queue* waiting_queue = create_queue();
 
     // Creating pointer that points to the running node
-    struct Node* running_node = (struct Node*)malloc(sizeof(struct Node));
+    struct Node* running_node = NULL;
 
     // Reading the initial state of the tasks from the file
     read_initial_state(waiting_queue, ready_queue, "init_tasks.txt");
@@ -92,8 +92,6 @@ int main(){
 
         // Checking the command and performing the required operation
         run_command(command, ready_queue, waiting_queue, running_node);
-        printf("________ DEBUG _________");
-        print_system_tasks(ready_queue, waiting_queue, running_node);
         running_node = update_running_node(running_node, ready_queue);
         printf("\n\n\n");
     }
@@ -327,16 +325,6 @@ void suspend_event(struct Node* running_node, struct Queue* ready_queue, struct 
         running_node->task_state = WAITING;
         enqueue(waiting_queue, running_node);
         printf("Task ( ID: %d ) is suspended.\n", running_node->task_id);
-
-        // if ready queue is not empty then shift the first task to running state
-        if(!is_empty(ready_queue)){
-            struct Node* node = dequeue(ready_queue);
-            node->task_state = RUNNING;
-            running_node = node;
-        }
-        else{
-            running_node = NULL;
-        }
     }
     else{
         printf("ERROR: Entered event ID is not of running task. Task can not be suspended.\n");
@@ -403,6 +391,10 @@ void free_up_memory(struct Queue* queue){
 
 // This function will update the running node
 struct Node* update_running_node(struct Node* running_node, struct Queue* ready_queue){
+    if(running_node->task_state == WAITING){
+        running_node = NULL;
+    }
+    
     if(running_node != NULL && !is_empty(ready_queue) ){
         if(running_node->task_pri > ready_queue->head->task_pri){
             struct Node* node = dequeue(ready_queue);
@@ -419,7 +411,11 @@ struct Node* update_running_node(struct Node* running_node, struct Queue* ready_
     }else if(running_node == NULL && is_empty(ready_queue)){
         running_node = NULL;
     }
-
+    
+    if(running_node){
+        running_node->next = NULL;
+    }
+    
     return running_node;
 }
 
