@@ -374,26 +374,53 @@ void run_command(char* command, struct Queue* ready_queue, struct Queue* waiting
 
 // runs l command
 void l_command(char* command){
-    if (command[1] == '\n')
-    {
-        print_commands();
-    }else{
-        printf("ERROR: Invalid command.\n");
+    int i=1;
+    while(command[i] != '\n'){
+        if(command[i] != ' '){
+            printf("ERROR: Invalid command.\n");
+            return;
+        }
+        i++;
     }
+    
+    print_commands();
+    
 }
 
 // runs p command
 void p_command(char* command, struct Queue* ready_queue, struct Queue* waiting_queue, struct Node* running_node){
-    if (command[1] == '\n')
-    {
-        print_system_tasks(ready_queue, waiting_queue, running_node);
-    }else{
-        printf("ERROR: Invalid command.\n");
-    } 
+    int i=1;
+    while(command[i] != '\n'){
+        if(command[i] != ' '){
+            printf("ERROR: Invalid command.\n");
+            return;
+        }
+        i++;
+    }    
+    
+    print_system_tasks(ready_queue, waiting_queue, running_node);
+
 }
 
 // runs n command
 void n_command(char* command, struct Queue* ready_queue, struct Queue* waiting_queue, struct Node* running_node){    
+    
+    int i=2, space_count = 0;
+    if(command[1] != ' '){
+        printf("ERROR: Invalid command.\n");
+        return;
+    }
+
+    while(command[i] != '\n'){
+        if(command[i] == ' '){
+            space_count++;
+        }else if(command[i] < '0' || command[i] > '9' || space_count >= 2){
+            printf("ERROR: Invalid command.\n");
+            return;
+        }
+        i++;
+    }
+    
     int task_id, task_pri;
     if (sscanf(command, "n %d %d", &task_id, &task_pri) == 2)
     {   
@@ -418,6 +445,23 @@ void n_command(char* command, struct Queue* ready_queue, struct Queue* waiting_q
 
 // runs e command
 void e_command(char* command, struct Queue* ready_queue, struct Queue* waiting_queue, struct Node* running_node){
+    
+    int i=2, space_count = 0;
+    if(command[1] != ' '){
+        printf("ERROR: Invalid command.\n");
+        return;
+    }
+
+    while(command[i] != '\n'){
+        if(command[i] == ' '){
+            space_count++;
+        }else if(command[i] < '0' || command[i] > '9' || space_count >= 1){
+            printf("ERROR: Invalid command.\n");
+            return;
+        }
+        i++;
+    }
+    
     int event_id;
     if (sscanf(command, "e %d", &event_id) == 1)
     {
@@ -432,6 +476,23 @@ void e_command(char* command, struct Queue* ready_queue, struct Queue* waiting_q
 
 // runs d command
 void d_command(char* command, struct Queue* ready_queue, struct Queue* waiting_queue, struct Node* running_node){
+    
+    int i=2, space_count = 0;
+    if(command[1] != ' '){
+        printf("ERROR: Invalid command.\n");
+        return;
+    }
+
+    while(command[i] != '\n'){
+        if(command[i] == ' '){
+            space_count++;
+        }else if(command[i] < '0' || command[i] > '9' || space_count >= 1){
+            printf("ERROR: Invalid command.\n");
+            return;
+        }
+        i++;
+    }
+    
     int task_id;
     if (sscanf(command, "d %d", &task_id) == 1)
     {
@@ -474,6 +535,23 @@ void d_command(char* command, struct Queue* ready_queue, struct Queue* waiting_q
 
 // runs w command
 void w_command(char* command, struct Queue* ready_queue, struct Queue* waiting_queue, struct Node* running_node){
+    
+    int i=2, space_count = 0;
+    if(command[1] != ' '){
+        printf("ERROR: Invalid command.\n");
+        return;
+    }
+
+    while(command[i] != '\n'){
+        if(command[i] == ' '){
+            space_count++;
+        }else if(command[i] < '0' || command[i] > '9' || space_count >= 2){
+            printf("ERROR: Invalid command.\n");
+            return;
+        }
+        i++;
+    }
+    
     int task_id, event_id;
     if (sscanf(command, "w %d %d", &task_id, &event_id) == 2)
     {
@@ -487,19 +565,43 @@ void w_command(char* command, struct Queue* ready_queue, struct Queue* waiting_q
 
 // runs q command
 void q_command(char* command, struct Queue* ready_queue, struct Queue* waiting_queue, struct Node* running_node){
-    if(command[1] == '\n'){
-        printf("Quitting the program.\n");
-        free_up_memory(ready_queue);
-        free_up_memory(waiting_queue);
-        free(running_node);
-        exit(0);
-    }else{
-        printf("ERROR: Invalid command.\n");
+    
+    int i=1;
+    while(command[i] != '\n'){
+        if(command[i] != ' '){
+            printf("ERROR: Invalid command.\n");
+            return;
+        }
+        i++;
     }
+    
+    printf("Quitting the program.\n");
+    free_up_memory(ready_queue);
+    free_up_memory(waiting_queue);
+    free(running_node);
+    exit(0);
+
 }
 
 // runs s command
 void s_command(char* command, struct Queue* ready_queue, struct Queue* waiting_queue, struct Node* running_node){
+    
+    int i=2, space_count = 0;
+    if(command[1] != ' '){
+        printf("ERROR: Invalid command.\n");
+        return;
+    }
+
+    while(command[i] != '\n'){
+        if(command[i] == ' '){
+            space_count++;
+        }else if(command[i] < '0' || command[i] > '9' || space_count >= 1){
+            printf("ERROR: Invalid command.\n");
+            return;
+        }
+        i++;
+    }
+    
     int event_id;
     if (sscanf(command, "s %d", &event_id) == 1)
     {

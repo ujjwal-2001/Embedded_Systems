@@ -29,7 +29,7 @@ int main(){
     print_commands();
 
     // MAIN LOOP
-
+    
     while(1){
         // Taking command from the user as string
         char command[30];
