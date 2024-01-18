@@ -1,103 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-
-// MACROS
-#define RUNNING 0
-#define READY 1
-#define WAITING 2
-
-#define DEFAULT_EVENT_ID 0
-
-// NODE STRUCTURE
-struct Node {
-    int task_id;
-    int task_pri;
-    int* ptr_context;
-    int task_state;
-    int event_id;
-    struct Node* next;
-};
-
-// QUEUE STRUCTURE
-
-struct Queue {
-    struct Node* head;
-    struct Node* tail;
-};
-
-// DECLERATION OF FUNCTIONS 
-
-// queue functions
-
-struct Queue* create_queue();
-struct Node* create_node(int task_id, int task_pri, int task_state, int event_id);
-int is_empty(struct Queue* queue);
-void enqueue(struct Queue* queue, struct Node* node);
-void enqueue_sorted(struct Queue* queue, struct Node* node);
-struct Node* dequeue(struct Queue* queue);
-struct Node* dequeue_any(struct Queue* queue, int task_id);
-void print_queue(struct Queue* queue);
-void print_node(struct Node* node);
-char* get_task_state(int task_state);
-void print_system_tasks(struct Queue* ready_queue, struct Queue* waiting_queue, struct Node* running_node);
-int is_unique_task_id(struct Queue* queue, int task_id);
-void event_trigger(struct Queue* waiting_queue,struct Queue* ready_queue, int event_id);
-void suspend_event(struct Node* running_node, struct Queue* ready_queue, struct Queue* waiting_queue, int event_id);
-void read_initial_state(struct Queue* waiting_queue, struct Queue* ready_queue, char* file_name);
-void move_ready_to_waiting(struct Queue* ready_queue,struct Queue* waiting_queue, int task_id, int event_id);
-struct Node* update_running_node(struct Node* running_node, struct Queue* ready_queue);
-void free_up_memory(struct Queue* queue);
-
-// declaration of functions which will implement the commands as per the requirement
-void print_commands();
-void run_command(char* command, struct Queue* ready_queue, struct Queue* waiting_queue, struct Node* running_node);
-
-// MAIN FUNCTION
-int main(){
-
-    // INITIAL SETUP
-
-    // Creating the queues
-    struct Queue* ready_queue = create_queue();
-    struct Queue* waiting_queue = create_queue();
-
-    // Creating pointer that points to the running node
-    struct Node* running_node = NULL;
-
-    // Reading the initial state of the tasks from the file
-    read_initial_state(waiting_queue, ready_queue, "init_tasks.txt");
-    running_node = dequeue(ready_queue);  
-    running_node->task_state = RUNNING; 
-
-    // Printing initial state
-    printf("+++++++++++++++++++++ INITIAL STATE OF QUEUES +++++++++++++++++++++\n");
-    print_system_tasks(ready_queue, waiting_queue, running_node);
-
-    // Printing commands for the user
-    print_commands();
-
-    // printf("Quitting the program.\n");
-    // free_up_memory(ready_queue);
-    // free_up_memory(waiting_queue);
-    // free(running_node);
-
-    // MAIN LOOP
-
-    while(1){
-        // Taking command from the user as string
-        char command[30];
-        printf("Enter the command: ");
-        fgets(command, 30, stdin);
-
-        // Checking the command and performing the required operation
-        run_command(command, ready_queue, waiting_queue, running_node);
-        running_node = update_running_node(running_node, ready_queue);
-        printf("\n\n\n");
-    }
-
-    return 0;
-}
+#include "scheduler.h"
 
 // DEFFINATION OF FUNCTIONS
 
@@ -391,32 +294,40 @@ void free_up_memory(struct Queue* queue){
 
 // This function will update the running node
 struct Node* update_running_node(struct Node* running_node, struct Queue* ready_queue){
-    if(running_node->task_state == WAITING){
-        running_node = NULL;
-    }
-    
-    if(running_node != NULL && !is_empty(ready_queue) ){
-        if(running_node->task_pri > ready_queue->head->task_pri){
-            struct Node* node = dequeue(ready_queue);
-            node->task_state = RUNNING;
-            running_node->task_state = READY;
-            enqueue_sorted(ready_queue, running_node);
-            running_node = node;
+    if(running_node != NULL){
+        if(running_node->task_state == WAITING){
+            if(!is_empty(ready_queue)){
+                struct Node* temp = dequeue(ready_queue);
+                temp->task_state = RUNNING;
+                temp->next = NULL;
+                return temp;
+            }
+            else{
+                return NULL;
+            }
+        }else if(!is_empty(ready_queue)){
+            if(running_node->task_pri > ready_queue->head->task_pri){
+                struct Node* temp = dequeue(ready_queue);
+                temp->task_state = RUNNING;
+                temp->next = NULL;
+                running_node->task_state = READY;
+                enqueue_sorted(ready_queue, running_node);
+                return temp;
+            }else{
+                return running_node;
+            }
+        }else{
+            return running_node;
         }
-    }else if(running_node == NULL && !is_empty(ready_queue)){
-        struct Node* node = dequeue(ready_queue);
-        node->task_state = RUNNING;
-        node->next = NULL;
-        running_node = node;
-    }else if(running_node == NULL && is_empty(ready_queue)){
-        running_node = NULL;
+    }else if(!is_empty(ready_queue)){
+        struct Node* temp = dequeue(ready_queue);
+        temp->task_state = RUNNING;
+        temp->next = NULL;
+        return temp;
     }
-    
-    if(running_node){
-        running_node->next = NULL;
+    else{
+        return NULL;
     }
-    
-    return running_node;
 }
 
 // This function will print the commands
@@ -439,77 +350,108 @@ void run_command(char* command, struct Queue* ready_queue, struct Queue* waiting
 
     switch (command[0])
     {
-    case 'l':{
-        if (command[1] == '\n')
-        {
-            print_commands();
-        }else{
-            printf("ERROR: Invalid command.\n");
-        }
+    case 'l': l_command(command);
+        break;
+    case 'p': p_command(command, ready_queue, waiting_queue, running_node);
+        break;
+    case 'n': n_command(command, ready_queue, waiting_queue, running_node);
+        break;
+    case 'd':  d_command(command, ready_queue, waiting_queue, running_node);
+        break; 
+    case 'w':w_command(command, ready_queue, waiting_queue, running_node);  
+        break;
+    case 'e': e_command(command, ready_queue, waiting_queue, running_node);
+        break;
+    case 's': s_command(command, ready_queue, waiting_queue, running_node);
+        break;
+    case 'q': q_command(command, ready_queue, waiting_queue, running_node);
+        break;
+    default:  
+        printf("ERROR: Invalid command.\n");
+        break; 
     }
-        break;
-    case 'p':{
-        if (command[1] == '\n')
-        {
-            print_system_tasks(ready_queue, waiting_queue, running_node);
-        }else{
-            printf("ERROR: Invalid command.\n");
-        } 
-    }   
-        break;
-    case 'n':{
-        int task_id, task_pri;
-        if (sscanf(command, "n %d %d", &task_id, &task_pri) == 2)
-        {   
-            if (is_unique_task_id(ready_queue, task_id) && is_unique_task_id(waiting_queue, task_id) && running_node->task_id != task_id)
-            {
-                struct Node* node = create_node(task_id, task_pri, READY, DEFAULT_EVENT_ID);
+}
 
-                enqueue_sorted(ready_queue, node);
-                printf("New task is created:-\n ");
-                print_node(node);
-            }
-            else
-            {   
-                printf("Task ID must be unique.\n");
-            }
+// runs l command
+void l_command(char* command){
+    if (command[1] == '\n')
+    {
+        print_commands();
+    }else{
+        printf("ERROR: Invalid command.\n");
+    }
+}
+
+// runs p command
+void p_command(char* command, struct Queue* ready_queue, struct Queue* waiting_queue, struct Node* running_node){
+    if (command[1] == '\n')
+    {
+        print_system_tasks(ready_queue, waiting_queue, running_node);
+    }else{
+        printf("ERROR: Invalid command.\n");
+    } 
+}
+
+// runs n command
+void n_command(char* command, struct Queue* ready_queue, struct Queue* waiting_queue, struct Node* running_node){    
+    int task_id, task_pri;
+    if (sscanf(command, "n %d %d", &task_id, &task_pri) == 2)
+    {   
+        if (is_unique_task_id(ready_queue, task_id) && is_unique_task_id(waiting_queue, task_id) && running_node->task_id != task_id)
+        {
+            struct Node* node = create_node(task_id, task_pri, READY, DEFAULT_EVENT_ID);
+
+            enqueue_sorted(ready_queue, node);
+            printf("New task is created:-\n ");
+            print_node(node);
         }
         else
-        {
-            printf("ERROR: Invalid command.\n");
+        {   
+            printf("Task ID must be unique.\n");
         }
     }
-        break;
+    else
+    {
+        printf("ERROR: Invalid command.\n");
+    }
+}
 
-    case 'd':{
-        int task_id;
-        if (sscanf(command, "d %d", &task_id) == 1)
+// runs e command
+void e_command(char* command, struct Queue* ready_queue, struct Queue* waiting_queue, struct Node* running_node){
+    int event_id;
+    if (sscanf(command, "e %d", &event_id) == 1)
+    {
+        event_trigger(waiting_queue, ready_queue, event_id);
+    }
+    else
+    {
+        printf("ERROR: Invalid command.\n");
+    }
+}
+
+
+// runs d command
+void d_command(char* command, struct Queue* ready_queue, struct Queue* waiting_queue, struct Node* running_node){
+    int task_id;
+    if (sscanf(command, "d %d", &task_id) == 1)
+    {
+        struct Node* node = dequeue_any(ready_queue, task_id);
+        if (node == NULL)
         {
-            struct Node* node = dequeue_any(ready_queue, task_id);
+            node = dequeue_any(waiting_queue, task_id);
             if (node == NULL)
             {
-                node = dequeue_any(waiting_queue, task_id);
-                if (node == NULL)
+                if (running_node->task_id == task_id)
                 {
-                    if (running_node->task_id == task_id)
-                    {
-                        printf("Entered task is running. Can not be delete.\n");
-                    }
-                    else
-                    {
-                        printf("Task is not in any queue.\n");
-                    }
+                    printf("Entered task is running. Can not be delete.\n");
                 }
                 else
                 {
-                    char* task_state = get_task_state(node->task_state);
-                    printf("Following task was deleted from %s queue.\n",task_state);
-                    print_node(node);
-                    free(node);
+                    printf("Task is not in any queue.\n");
                 }
             }
             else
-            {   
+            {
                 char* task_state = get_task_state(node->task_state);
                 printf("Following task was deleted from %s queue.\n",task_state);
                 print_node(node);
@@ -517,66 +459,54 @@ void run_command(char* command, struct Queue* ready_queue, struct Queue* waiting
             }
         }
         else
-        {
-            printf("ERROR: Invalid command.\n");
-        } 
-    }  
-        break; 
-
-    case 'w':{
-        int task_id, event_id;
-        if (sscanf(command, "w %d %d", &task_id, &event_id) == 2)
-        {
-            move_ready_to_waiting(ready_queue, waiting_queue, task_id, event_id);
-        }
-        else
-        {
-            printf("ERROR: Invalid command.\n");
-        } 
-    }  
-        break;
-
-    case 'e':{
-        int event_id;
-        if (sscanf(command, "e %d", &event_id) == 1)
-        {
-            event_trigger(waiting_queue, ready_queue, event_id);
-        }
-        else
-        {
-            printf("ERROR: Invalid command.\n");
+        {   
+            char* task_state = get_task_state(node->task_state);
+            printf("Following task was deleted from %s queue.\n",task_state);
+            print_node(node);
+            free(node);
         }
     }
-        break;
-
-    case 's':{
-        int event_id;
-        if (sscanf(command, "s %d", &event_id) == 1)
-        {
-            suspend_event(running_node, ready_queue, waiting_queue, event_id);
-        }
-        else
-        {
-            printf("ERROR: Invalid command.\n");
-        }
-    }
-        break;
-
-    case 'q':{
-        if(command[1] == '\n'){
-            printf("Quitting the program.\n");
-            free_up_memory(ready_queue);
-            free_up_memory(waiting_queue);
-            free(running_node);
-            exit(0);
-        }else{
-            printf("ERROR: Invalid command.\n");
-        }
-    }
-        break;
-
-    default:  
+    else
+    {
         printf("ERROR: Invalid command.\n");
-        break; 
+    } 
+}
+
+// runs w command
+void w_command(char* command, struct Queue* ready_queue, struct Queue* waiting_queue, struct Node* running_node){
+    int task_id, event_id;
+    if (sscanf(command, "w %d %d", &task_id, &event_id) == 2)
+    {
+        move_ready_to_waiting(ready_queue, waiting_queue, task_id, event_id);
+    }
+    else
+    {
+        printf("ERROR: Invalid command.\n");
+    } 
+}
+
+// runs q command
+void q_command(char* command, struct Queue* ready_queue, struct Queue* waiting_queue, struct Node* running_node){
+    if(command[1] == '\n'){
+        printf("Quitting the program.\n");
+        free_up_memory(ready_queue);
+        free_up_memory(waiting_queue);
+        free(running_node);
+        exit(0);
+    }else{
+        printf("ERROR: Invalid command.\n");
+    }
+}
+
+// runs s command
+void s_command(char* command, struct Queue* ready_queue, struct Queue* waiting_queue, struct Node* running_node){
+    int event_id;
+    if (sscanf(command, "s %d", &event_id) == 1)
+    {
+        suspend_event(running_node, ready_queue, waiting_queue, event_id);
+    }
+    else
+    {
+        printf("ERROR: Invalid command.\n");
     }
 }
