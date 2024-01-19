@@ -20,7 +20,7 @@ Any task that is in the CPU will either be found in any one of the following:-
 ### More about task states
 State of the tasks changes according to the image given below:-
 
-<img src="url_to_your_image" alt="Alt Text" width="500">
+<img src="image.png" alt="Alt Text" width="500">
 
 1. __Running__: CPU is currently executing the task
 2. __Ready__: Needs CPU time but higher priority task is running. Eligible to compete with other Ready tasks for CPU time.
@@ -60,9 +60,24 @@ One can add his or her own data in the ```init_tasks.txt``` file in a comma sepr
 
 _NOTE: One can only add waiting(2) or ready(1) task in the ```init_tasks.txt```. Error is generated if given otherwise._
 
-
-
 ## Running Different commands
+
+### l command
+This commands lists all the available coommands.
+### p command
+This command prints the information of all the tasks that with which CPU is working at the moment.
+### n command
+This command generates a new task with the given task ID and priority. By default the even ID is 0. An error is generated if the task ID provided by the user is not unique. It also prints the information of the new task which is being added.
+### d command
+This command delets any waiting or ready task with given task ID and displays its information if deleted successfully. "Task not found" message is generated if the task given for deletion does not exists. Moreover, an error is generated if user tries to delets an running task. 
+### w command
+This command moves a ready task with the given task ID to the waiting and overwrites its event ID as provided by the user, it also prits the information of the task which is moved. An error is generated if no task with the given task ID is waiting.
+### e command
+This commands triggers the event given by the user. If any task exists in waiting queue  with the given event ID, it will pushed to ready queue according to their priority. 
+### s command
+This command suspends the running task if its event ID matches, thereafter, it prints the information of the task which was suspended.
+### q command
+This commands frees up the memory and quits the program.
 
 ## Author
 UJJWAL CHAUDHARY, M. Tech. ESE, IISc Bengaluru
