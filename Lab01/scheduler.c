@@ -251,7 +251,8 @@ void read_initial_state(struct Queue* waiting_queue, struct Queue* ready_queue, 
                 }
                 else if(task_state == WAITING){
                     enqueue(waiting_queue, node);
-                }if(task_state == RUNNING){
+                } 
+                else if(task_state == RUNNING){
                     printf("ERROR: Can only have waiting or ready task in the %s\n",file_name);
                     free_up_memory(ready_queue);
                     free_up_memory(waiting_queue);
