@@ -38,6 +38,8 @@ int main(){
 
         // Checking the command and performing the required operation
         run_command(command, ready_queue, waiting_queue, running_node);
+        printf("_____DEBUG_____");
+        print_system_tasks(ready_queue, waiting_queue, running_node);
         running_node = update_running_node(running_node, ready_queue);
         printf("\n\n\n");
     }

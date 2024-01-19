@@ -54,7 +54,7 @@ Put ```main.c```, ```scheduler.c```, ```scheduler.h``` and ```init_tasks.txt``` 
 
 When program starts it reads the data from the ```init_tasks.txt``` file and fills us the ```ready_queue```, ```waiting_queue``` and ```running_node``` accordingly and displayed on the console with the information of all the available commands. Now new commands can be entered by the user. 
 
-<img src="1.png" alt="Alt Text" width="700">
+<img src=".\assets\1.png" alt="Alt Text" width="700">
 
 One can add his or her own data in the ```init_tasks.txt``` file in a comma seprated format i.e. ```task ID,priority,state,event ID```. For __example__ if we want to add a waiting(2) task with ID of 67, priority of 5 with event ID of 90 we would add ```67,5,2,90```  to ```init_tasks.txt```.
 
@@ -65,33 +65,53 @@ _NOTE: One can only add waiting(2) or ready(1) task in the ```init_tasks.txt```.
 ### l command
 This commands lists all the available coommands.
 
-<img src="l_command.png" alt="Alt Text" width="700">
+<img src=".\assets\l_command.png" alt="Alt Text" width="700">
 
 
 ### p command
 This command prints the information of all the tasks that with which CPU is working at the moment.
 
-<img src="p_command.png" alt="Alt Text" width="700">
+<img src=".\assets\p_command.png" alt="Alt Text" width="700">
 
 ### n command
 This command generates a new task with the given task ID and priority. By default the even ID is 0. An error is generated if the task ID provided by the user is not unique. It also prints the information of the new task which is being added.
 
-<img src="n_command_1.png" alt="Alt Text" width="700">
+<img src=".\assets\n_command_1.png" alt="Alt Text" width="700">
+
+In the above mentioned image we can see that a new task is added with task ID 45 to ready queue, but sience its priority is higher than the running task it shifts to running node.
+
+<img src=".\assets\n_command_2.png" alt="Alt Text" width="700">
+
+We noticed an error when tring to add a task with an ID which is not unique.
 
 ### d command
 This command delets any waiting or ready task with given task ID and displays its information if deleted successfully. "Task not found" message is generated if the task given for deletion does not exists. Moreover, an error is generated if user tries to delets an running task. 
 
-<img src="1.png" alt="Alt Text" width="700">
+<img src=".\assetsd_command_1.png" alt="Alt Text" width="700">
+
+Deleting a waiting task.
+
+<img src=".\assets\d_command_2.png" alt="Alt Text" width="700">
+
+Error received when trying to delete a running task.
 
 ### w command
 This command moves a ready task with the given task ID to the waiting and overwrites its event ID as provided by the user, it also prits the information of the task which is moved. An error is generated if no task with the given task ID is waiting.
 
-<img src="1.png" alt="Alt Text" width="700">
+<img src=".\assets\w_command_1.png" alt="Alt Text" width="700">
+
+Shifted task with task ID of 12 and overwritten the eant ID from 4 to 6.
+
+<img src=".\assets\w_command_2.png" alt="Alt Text" width="700">
+
+Tying to shift a task which is not ready.
 
 ### e command
 This commands triggers the event given by the user. If any task exists in waiting queue  with the given event ID, it will pushed to ready queue according to their priority.
 
-<img src="1.png" alt="Alt Text" width="700">
+<img src=".\assets\e_command.png" alt="Alt Text" width="700">
+
+Triggered event 6 and thereby shifetd all waiting tasks with event ID of 6 to ready queue.
 
 ### s command
 This command suspends the running task if its event ID matches, thereafter, it prints the information of the task which was suspended.
