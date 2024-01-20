@@ -1,14 +1,14 @@
 # Assignment 01
-This assignment contaions a C program implementation of tassk scheduling for the partial grading of the course E3-257.
+This assignment contains a C program implementation of task scheduling for the partial grading of the course E3-257.
 
 ## Brief
-This is a program illustrating scheduling of tasks in a CPU. A given task can be in one of the three states namely running, waiting or ready state. For keeping track of tasks in different states, this program uses queues. Each task is a structure that have following members:-
+This is a program illustrating scheduling of tasks in a CPU. A given task can be in one of the three states namely running, waiting or ready state. For keeping track of tasks in different states, this program uses queues. Each task is a structure that has following members:-
 
 1. ```task_id```: This is an ```integer``` which is unique for each task. It acts as the ID of that task.
 2. ```task_pri```: This is an ```integer``` that informs about the priority of the task (lower the value higher the priority)
 3. ```ptr_context```: For this program this pointer is pointer to ```NULL```.
 4. ```task_state``` : This is an ```integer``` that is mapped to the task state as per ```macros``` defined. In this program running, ready and waiting is represented by 0, 1 and 2 respectively.
-5. ```event_id```: This is an ```integer``` that represents the event or the resource that task is waiting for to be triggred or released for it to jump to ready state.
+5. ```event_id```: This is an ```integer``` that represents the event or the resource that task is waiting for to be triggered or released for it to jump to ready state.
 6. ```next```: This is a pointer to the next Node/task.
 
 Any task that is in the CPU will either be found in any one of the following:-
@@ -28,7 +28,7 @@ State of the tasks changes according to the image given below:-
 
 ## Program features
 Following are the features of the program:-
-1. __Initialization__: The ```init_task.txt``` file act as the starting point of the program. All the queues are given the initial values from this file.
+1. __Initialization__: The ```init_task.txt``` file acts as the starting point of the program. All the queues are given the initial values from this file.
 2. __Commands__: User can give the following commands using ```console```
    
 | Command            | Description                                            |
@@ -52,7 +52,7 @@ Put ```main.c```, ```scheduler.c```, ```scheduler.h``` and ```init_tasks.txt``` 
 > gcc main.c scheduler.c -o lab01 ; .\lab01
 ```
 
-When program starts it reads the data from the ```init_tasks.txt``` file and fills us the ```ready_queue```, ```waiting_queue``` and ```running_node``` accordingly and displayed on the console with the information of all the available commands. Now new commands can be entered by the user. 
+When program starts it reads the data from the ```init_tasks.txt``` file and fills up the ```ready_queue```, ```waiting_queue``` and ```running_node``` accordingly and displayed on the console with the information of all the available commands. Now new commands can be entered by the user. 
 
 <img src=".\assets\1.png" alt="Alt Text" width="700">
 
@@ -63,7 +63,7 @@ _NOTE: One can only add waiting(2) or ready(1) task in the ```init_tasks.txt```.
 ## Running Different commands
 
 ### l command
-This commands lists all the available coommands.
+This commands lists all the available commands.
 
 <img src=".\assets\l_command.png" alt="Alt Text" width="700">
 
@@ -104,14 +104,14 @@ Shifted task with task ID of 12 and overwritten the eant ID from 4 to 6.
 
 <img src=".\assets\w_command_2.png" alt="Alt Text" width="700">
 
-Tying to shift a task which is not ready.
+Trying to shift a task which is not ready.
 
 ### e command
 This commands triggers the event given by the user. If any task exists in waiting queue  with the given event ID, it will pushed to ready queue according to their priority.
 
 <img src=".\assets\e_command.png" alt="Alt Text" width="700">
 
-Triggered event 6 and thereby shifetd all waiting tasks with event ID of 6 to ready queue.
+Triggered event 6 and thereby shifted all waiting tasks with event ID of 6 to ready queue. Thereafter, running node was updates as per the priority.
 
 ### s command
 This command suspends the running task if its event ID matches, thereafter, it prints the information of the task which was suspended.
@@ -136,4 +136,4 @@ Few examples of invalid errors are listed below:-
  
 
 ## Author
-UJJWAL CHAUDHARY, M. Tech. ESE, IISc Bengaluru
+UJJWAL CHAUDHARY, M. Tech. ESE, IISc Bengaluru.
