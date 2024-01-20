@@ -43,6 +43,7 @@ void enqueue(struct Queue* queue, struct Node* node){
     else{
         queue->tail->next = node;
         queue->tail = node;
+        node->next = NULL;
     }
 }
 

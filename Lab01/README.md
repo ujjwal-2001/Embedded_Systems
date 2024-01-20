@@ -87,7 +87,7 @@ We noticed an error when tring to add a task with an ID which is not unique.
 ### d command
 This command delets any waiting or ready task with given task ID and displays its information if deleted successfully. "Task not found" message is generated if the task given for deletion does not exists. Moreover, an error is generated if user tries to delets an running task. 
 
-<img src=".\assetsd_command_1.png" alt="Alt Text" width="700">
+<img src=".\assets\d_command_1.png" alt="Alt Text" width="700">
 
 Deleting a waiting task.
 
@@ -116,7 +116,7 @@ Triggered event 6 and thereby shifetd all waiting tasks with event ID of 6 to re
 ### s command
 This command suspends the running task if its event ID matches, thereafter, it prints the information of the task which was suspended.
 
-<img src="1.png" alt="Alt Text" width="700">
+<img src=".\assets\s_command_1.png" alt="Alt Text" width="700">
 
 ### q command
 This commands frees up the memory and quits the program.
