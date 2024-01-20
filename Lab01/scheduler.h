@@ -5,7 +5,7 @@
 #define RUNNING 0
 #define READY 1
 #define WAITING 2
-
+#define TRUE 1
 #define DEFAULT_EVENT_ID 0
 
 // NODE STRUCTURE
@@ -55,7 +55,7 @@ void p_command(char* command, struct Queue* ready_queue, struct Queue* waiting_q
 void n_command(char* command, struct Queue* ready_queue, struct Queue* waiting_queue, struct Node* running_node);
 void e_command(char* command, struct Queue* ready_queue, struct Queue* waiting_queue, struct Node* running_node);
 void d_command(char* command, struct Queue* ready_queue, struct Queue* waiting_queue, struct Node* running_node);
-void w_command(char* command, struct Queue* ready_queue, struct Queue* waiting_queue, struct Node* running_node);
+void w_command(char* command, struct Queue* ready_queue, struct Queue* waiting_queue);
 void q_command(char* command, struct Queue* ready_queue, struct Queue* waiting_queue, struct Node* running_node);
 void s_command(char* command, struct Queue* ready_queue, struct Queue* waiting_queue, struct Node* running_node);
 

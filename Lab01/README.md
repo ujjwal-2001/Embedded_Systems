@@ -20,7 +20,7 @@ Any task that is in the CPU will either be found in any one of the following:-
 ### More about task states
 State of the tasks changes according to the image given below:-
 
-<img src="image.png" alt="Alt Text" width="500">
+<img src=".\assets\image.png" alt="Alt Text" width="500">
 
 1. __Running__: CPU is currently executing the task
 2. __Ready__: Needs CPU time but higher priority task is running. Eligible to compete with other Ready tasks for CPU time.
@@ -118,14 +118,22 @@ This command suspends the running task if its event ID matches, thereafter, it p
 
 <img src=".\assets\s_command_1.png" alt="Alt Text" width="700">
 
+Suspended the running task by giving its event ID.
+
+<img src=".\assets\s_command_2.png" alt="Alt Text" width="700">
+
+Error displayed when trying to suspend an event which is not running.
+
 ### q command
 This commands frees up the memory and quits the program.
 
-<img src="1.png" alt="Alt Text" width="700">
+<img src=".\assets\q_command.png" alt="Alt Text" width="700">
 
 ### Invalid commands
 
-
+Few examples of invalid errors are listed below:-
+<img src=".\assets\invalid_commands.png" alt="Alt Text" width="700">
+ 
 
 ## Author
 UJJWAL CHAUDHARY, M. Tech. ESE, IISc Bengaluru

@@ -205,11 +205,18 @@ void event_trigger(struct Queue* waiting_queue, struct Queue* ready_queue, int e
             temp->task_state = READY;
             if(prev == NULL){
                 waiting_queue->head = waiting_queue->head->next;
+                temp->next = NULL;
                 enqueue_sorted(ready_queue, temp);
                 temp = waiting_queue->head;
             }
             else{
+
+                if (temp == waiting_queue->tail){
+                    waiting_queue->tail = prev;
+                }
+                
                 prev->next = temp->next;
+                temp->next = NULL;
                 enqueue_sorted(ready_queue, temp);
                 temp = prev->next;
             }
@@ -227,6 +234,8 @@ void suspend_event(struct Node* running_node, struct Queue* ready_queue, struct 
     // if given task id is running . shift it to waiting queue
     if(running_node->event_id == event_id){
         running_node->task_state = WAITING;
+        running_node->event_id = event_id;
+        running_node->next = NULL;
         enqueue(waiting_queue, running_node);
         printf("Task ( ID: %d ) is suspended.\n", running_node->task_id);
     }
@@ -310,7 +319,8 @@ struct Node* update_running_node(struct Node* running_node, struct Queue* ready_
                 struct Node* temp = dequeue(ready_queue);
                 temp->task_state = RUNNING;
                 temp->next = NULL;
-                return temp;
+                running_node = temp;
+                return running_node;
             }
             else{
                 return NULL;
@@ -322,7 +332,8 @@ struct Node* update_running_node(struct Node* running_node, struct Queue* ready_
                 temp->next = NULL;
                 running_node->task_state = READY;
                 enqueue_sorted(ready_queue, running_node);
-                return temp;
+                running_node = temp;
+                return running_node;
             }else{
                 return running_node;
             }
@@ -368,7 +379,7 @@ void run_command(char* command, struct Queue* ready_queue, struct Queue* waiting
         break;
     case 'd':  d_command(command, ready_queue, waiting_queue, running_node);
         break; 
-    case 'w':w_command(command, ready_queue, waiting_queue, running_node);  
+    case 'w': w_command(command, ready_queue, waiting_queue);  
         break;
     case 'e': e_command(command, ready_queue, waiting_queue, running_node);
         break;
@@ -544,7 +555,7 @@ void d_command(char* command, struct Queue* ready_queue, struct Queue* waiting_q
 }
 
 // runs w command
-void w_command(char* command, struct Queue* ready_queue, struct Queue* waiting_queue, struct Node* running_node){
+void w_command(char* command, struct Queue* ready_queue, struct Queue* waiting_queue){
     
     int i=2, space_count = 0;
     if(command[1] != ' '){

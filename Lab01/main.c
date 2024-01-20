@@ -18,7 +18,7 @@ int main(){
     // Reading the initial state of the tasks from the file
     read_initial_state(waiting_queue, ready_queue, "init_tasks.txt");
     running_node = dequeue(ready_queue);  
-    running_node->task_state = DEFAULT_EVENT_ID;
+    running_node->task_state = RUNNING;
     running_node->next = NULL; 
 
     // Printing initial state
@@ -30,7 +30,7 @@ int main(){
 
     // MAIN LOOP
     
-    while(1){
+    while(TRUE){
         // Taking command from the user as string
         char command[30];
         printf("Enter the command: ");
@@ -38,8 +38,6 @@ int main(){
 
         // Checking the command and performing the required operation
         run_command(command, ready_queue, waiting_queue, running_node);
-        printf("_____DEBUG_____");
-        print_system_tasks(ready_queue, waiting_queue, running_node);
         running_node = update_running_node(running_node, ready_queue);
         printf("\n\n\n");
     }
