@@ -136,4 +136,4 @@ Few examples of invalid errors are listed below:-
  
 
 ## Author
-UJJWAL CHAUDHARY, M. Tech. ESE, IISc Bengaluru.
+[UJJWAL CHAUDHARY, M. Tech. ESE 2023-25, IISc Bengaluru](https://www.linkedin.com/in/ujjwal-chaudhary-4436701aa/)
