@@ -25,7 +25,7 @@
 uint8_t SW1;
 uint8_t SW2;
 uint8_t delay;
-int blink_delay = 2000;
+int blink_delay = MAX_BLINK_DELAY;
 int select_color = 0;
 uint8_t color = COLOR_GREEN_ON;
 int flag = 0;
@@ -42,43 +42,43 @@ int main ()
     GPIO_PORTF_DIR_R &= (~PIN0); // Set PF0 (SW2) as input
     GPIO_PORTF_PUR_R |= PIN4 + PIN0; // Enable pull-up resistor for PF4 (SW1) and PF0 (SW2)
  
-while(1)
-{
-    if (flag==0){
-        GPIO_PORTF_DATA_R = color;
-        delayMs(blink_delay);
-        GPIO_PORTF_DATA_R = 0x00;
-        delayMs(blink_delay);
-    }
- 
- 
-    SW1 = ((GPIO_PORTF_DATA_R & (1<<4))>>4); // Read PF4 into SW1
-    SW2 = ((GPIO_PORTF_DATA_R & (1<<0))>>0); // Read PF0 into SW2
- 
-    if(SW1 == 0)
+    while(1)
     {
-        select_color = (select_color + 1)%7;
-        update_color();
-        delay_nor(70);
-    }
- 
-    if(SW2 == 0)
-        {
-                if(blink_delay > MIN_BLINK_DELAY)
-                {
-                    blink_delay = blink_delay/2;
-                    flag=0;
-                    delay_nor(70);
-                }
-                else
-                {
-                    blink_delay = MAX_BLINK_DELAY;
-                    GPIO_PORTF_DATA_R = color;
-                    flag=1;
-                    delay_nor(70);
-                }
+        if (flag==0){
+            GPIO_PORTF_DATA_R = color;
+            delayMs_Check(blink_delay);
+            GPIO_PORTF_DATA_R = 0x00;
+            delayMs_Check(blink_delay);
         }
-}
+    
+    
+        SW1 = ((GPIO_PORTF_DATA_R & (1<<4))>>4); // Read PF4 into SW1
+        SW2 = ((GPIO_PORTF_DATA_R & (1<<0))>>0); // Read PF0 into SW2
+    
+        if(SW1 == 0)
+        {
+            select_color = (select_color + 1)%7;
+            update_color();
+            delayMs(70);
+        }
+    
+        if(SW2 == 0)
+        {
+            if(blink_delay > MIN_BLINK_DELAY)
+            {
+                blink_delay = blink_delay/2;
+                flag=0;
+                delayMs(70);
+            }
+            else
+            {
+                blink_delay = MAX_BLINK_DELAY;
+                GPIO_PORTF_DATA_R = color;
+                flag=1;
+                delayMs(70);
+            }
+        }
+    }
 }
  
 void update_color(){
@@ -107,47 +107,47 @@ void update_color(){
         }
 }
 
-void delay_nor(int n)
+void delayMs(int n)
 {
 int i, j;
 for(i = 0 ; i < n; i++)
 for(j = 0; j < 3180; j++) {} /* do nothing for 1 ms */
 }
  
-void delayMs(int n)
+void delayMs_Check(int n)
 {
-int i, j;
-for(i = 0 ; i < n; i++)
-{
-       SW1 = ((GPIO_PORTF_DATA_R & (1<<4))>>4); 
-       SW2 = ((GPIO_PORTF_DATA_R & (1<<0))>>0);
- 
-       if(SW1 == 0)
-       {
+    int i, j;
+    for(i = 0 ; i < n; i++)
+    {
+        SW1 = ((GPIO_PORTF_DATA_R & (1<<4))>>4); 
+        SW2 = ((GPIO_PORTF_DATA_R & (1<<0))>>0);
+    
+        if(SW1 == 0)
+        {
             select_color = (select_color + 1)%7;
             update_color();
-            delay_nor(70);
+            delayMs(70);
             break;
-       }
- 
-           if(SW2== 0)
-           {
-                   if(blink_delay > MIN_BLINK_DELAY)
-                {
-                    blink_delay = blink_delay/2;
-                    flag=0;
-                    delay_nor(70);
-                }
-                else
-                {
-                    blink_delay = MAX_BLINK_DELAY;
-                    GPIO_PORTF_DATA_R = color;
-                    flag=1;
-                    delay_nor(70);
-                }
-                delay_nor(70);
-                break;
-           }
-for(j = 0; j < 3180; j++){} /* do nothing for 1 ms */
-}
+        }
+    
+        if(SW2== 0)
+        {
+            if(blink_delay > MIN_BLINK_DELAY)
+            {
+                blink_delay = blink_delay/2;
+                flag=0;
+                delayMs(70);
+            }
+            else
+            {
+                blink_delay = MAX_BLINK_DELAY;
+                GPIO_PORTF_DATA_R = color;
+                flag=1;
+                delayMs(70);
+            }
+            delayMs(70);
+            break;
+    }
+        for(j = 0; j < 3180; j++){} /* do nothing for 1 ms */
+    }
 }

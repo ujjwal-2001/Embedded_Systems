@@ -38,7 +38,46 @@ int main(){
 
         // Checking the command and performing the required operation
         run_command(command, ready_queue, waiting_queue, running_node);
+
+        // DEBUGGING before update
+
+        printf("+++++++++++++++++++++ BEFORE UPDATE +++++++++++++++++++++\n");
+        print_system_tasks(ready_queue, waiting_queue, running_node);
+        // printing heads and tails
+        if(! is_empty(ready_queue))
+        {
+            printf("ready_queue head: %d\n", ready_queue->head->task_id);
+            printf("ready_queue tail: %d\n", ready_queue->tail->task_id);
+        }
+
+        if(! is_empty(waiting_queue))
+        {
+            printf("waiting_queue head: %d\n", waiting_queue->head->task_id);
+            printf("waiting_queue tail: %d\n", waiting_queue->tail->task_id);
+        }
+        if(running_node!=NULL) 
+            printf("running_node: %d\n", running_node->task_id);
+
         running_node = update_running_node(running_node, ready_queue);
+
+        // DEBUGGING after update
+        printf("+++++++++++++++++++++ AFTER UPDATE +++++++++++++++++++++\n");
+        print_system_tasks(ready_queue, waiting_queue, running_node);
+        // printing heads and tails
+        if(! is_empty(ready_queue))
+        {
+            printf("ready_queue head: %d\n", ready_queue->head->task_id);
+            printf("ready_queue tail: %d\n", ready_queue->tail->task_id);
+        }
+
+        if(! is_empty(waiting_queue))
+        {
+            printf("waiting_queue head: %d\n", waiting_queue->head->task_id);
+            printf("waiting_queue tail: %d\n", waiting_queue->tail->task_id);
+        }
+        if(running_node!=NULL) 
+            printf("running_node: %d\n", running_node->task_id);
+
         printf("\n\n\n");
     }
 

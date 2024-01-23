@@ -14,6 +14,7 @@ struct Queue* create_queue(){
 
 // This function will create a node for queue and return it
 struct Node* create_node(int task_id,int task_pri, int task_state, int event_id){
+    printf("malloc called:-\n");
     struct Node* node = (struct Node*)malloc(sizeof(struct Node));
     node->task_id = task_id;
     node->task_pri = task_pri;
@@ -375,7 +376,11 @@ void run_command(char* command, struct Queue* ready_queue, struct Queue* waiting
         break;
     case 'p': p_command(command, ready_queue, waiting_queue, running_node);
         break;
-    case 'n': n_command(command, ready_queue, waiting_queue, running_node);
+    case 'n': {
+        printf("n_command :-\n ");
+        n_command(command, ready_queue, waiting_queue, running_node);
+        
+        }
         break;
     case 'd':  d_command(command, ready_queue, waiting_queue, running_node);
         break; 
@@ -441,26 +446,39 @@ void n_command(char* command, struct Queue* ready_queue, struct Queue* waiting_q
         }
         i++;
     }
+
+    printf("n_command verified:-\n ");
     
     int task_id, task_pri;
     if (sscanf(command, "n %d %d", &task_id, &task_pri) == 2)
     {   
-        if (is_unique_task_id(ready_queue, task_id) && is_unique_task_id(waiting_queue, task_id) && running_node->task_id != task_id)
-        {
+        if (is_unique_task_id(ready_queue, task_id) && is_unique_task_id(waiting_queue, task_id))
+        {   
+            if(running_node != NULL){
+                if(running_node->task_id == task_id){
+                    printf("Task ID must be unique.\n");
+                    return;
+                }
+            }
+            
+            printf("create_node called task_ip %d, task_pri %d:-\n ", task_id, task_pri);
             struct Node* node = create_node(task_id, task_pri, READY, DEFAULT_EVENT_ID);
-
+            printf("New task is created DEBUG :-\n ");
             enqueue_sorted(ready_queue, node);
             printf("New task is created:-\n ");
             print_node(node);
+            return;
         }
         else
         {   
             printf("Task ID must be unique.\n");
+            return;
         }
     }
     else
     {
         printf("ERROR: Invalid command.\n");
+        return;
     }
 }
 
