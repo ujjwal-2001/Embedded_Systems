@@ -447,11 +447,17 @@ void n_command(char* command, struct Queue* ready_queue, struct Queue* waiting_q
     {   
         if (is_unique_task_id(ready_queue, task_id) && is_unique_task_id(waiting_queue, task_id) && running_node->task_id != task_id)
         {
+            if(running_node != NULL){
+                if(running_node->task_id == task_id){
+                    printf("Task ID must be unique.\n");
+                    return;
+                }
+            }
             struct Node* node = create_node(task_id, task_pri, READY, DEFAULT_EVENT_ID);
-
             enqueue_sorted(ready_queue, node);
             printf("New task is created:-\n ");
             print_node(node);
+            return;
         }
         else
         {   
