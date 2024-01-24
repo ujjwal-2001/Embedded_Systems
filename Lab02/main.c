@@ -21,7 +21,7 @@
 
 #define MAX_BLINK_DELAY 2000
 #define MIN_BLINK_DELAY 100
-#define DEBOUNCING_DELAY DEBOUNCING_DELAY
+#define DEBOUNCING_DELAY 70
 
 #define SW1 ((GPIO_PORTF_DATA_R & (1<<4))>>4)
 #define SW2 ((GPIO_PORTF_DATA_R & (1<<0))>>0)
@@ -31,7 +31,11 @@ int blink_delay = MAX_BLINK_DELAY;
 int select_color = 0;
 uint8_t color = COLOR_GREEN_ON;
 int flag = 0;
- 
+
+void delayMs(int n);
+void delayMs_check(int n);
+void update_color();
+
 int main ()
 {
  
