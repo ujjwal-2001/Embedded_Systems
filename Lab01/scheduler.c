@@ -94,6 +94,7 @@ struct Node* dequeue_any(struct Queue* queue, int task_id){
                     return temp;
                 }
                 else{
+                    if(temp == queue->tail) queue->tail = prev;
                     prev->next = temp->next;
                     return temp;
                 }
