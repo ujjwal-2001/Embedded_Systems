@@ -2,7 +2,7 @@
 
 This assignment is for the partial grading of the course E3-257.
 
-# Blinking LED Project Readme
+# Blinking LED Project
 
 This project is designed for the TM4C123GH6PM microcontroller to control the blinking of an LED with various colors using push buttons.
 
