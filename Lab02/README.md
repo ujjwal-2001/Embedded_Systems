@@ -2,46 +2,54 @@
 
 This assignment is for the partial grading of the course E3-257.
 
-# RGB LED Controller with TIVA C Series LaunchPad
+# Blinking LED Project Readme
 
-This project implements a simple RGB LED controller using the TIVA C Series LaunchPad. The program allows the user to cycle through different colors by pressing a button (SW1), and it also provides the option to change the blinking speed of the LED by pressing another button (SW2).
+This project is designed for the TM4C123GH6PM microcontroller to control the blinking of an LED with various colors using push buttons.
 
 ## Table of Contents
 
-- [Features](#features)
-- [Hardware Requirements](#hardware-requirements)
-- [Macros and Definitions](#macros-and-definitions)
-- [How to Use](#how-to-use)
-- [Contributing](#Author)
+- [Introduction](#introduction)
+- [Requirements](#requirements)
+- [Hardware Setup](#hardware-setup)
+- [Usage](#usage)
+- [Code Structure](#code-structure)
+- [Author](#author)
 
-## Features
+## Introduction
 
-- LED colors: Green, Blue, Cyan, Red, Yellow, Magenta, and White.
-- Adjust the blinking speed with SW2.
-- Debouncing mechanism for button presses.
+This project utilizes the TM4C123GH6PM microcontroller to control the blinking of an LED with different colors. The blinking pattern and LED color can be changed using push buttons (SW1 and SW2).
 
-## Hardware Requirements
+## Requirements
 
-- TIVA C Series LaunchPad.
-- RGB LED connected to pins PF1, PF2, and PF3.
-- Two push buttons (SW1 and SW2) connected to pins PF4 and PF0.
+- **Hardware:** TM4C123GH6PM microcontroller, LED, push buttons (SW1 and SW2)
+- **Software:** TivaWare Peripheral Driver Library
 
-## Macros and Definitions
+## Hardware Setup
 
-- **Pins and Clock Macros:**
-  - `PIN0`, `PIN1`, `PIN2`, `PIN3`, `PIN4`: Bit masks for individual pins.
-- **Color Macros:**
-  - `COLOR_GREEN_ON`, `COLOR_BLUE_ON`, `COLOR_CYAN_ON`, `COLOR_RED_ON`, `COLOR_YELLOW_ON`, `COLOR_MAGENTA_ON`, `COLOR_WHITE_ON`: RGB LED color configurations.
-- **Blinking Delay Limits:**
-  - `MAX_BLINK_DELAY`: Maximum delay for LED blinking.
-  - `MIN_BLINK_DELAY`: Minimum delay for LED blinking.
+1. Connect the LED to the appropriate pins on the TM4C123GH6PM microcontroller.
+2. Connect push buttons SW1 and SW2 to the designated pins on the microcontroller.
+3. Ensure proper power supply and connections.
 
-## How to Use
+## Usage
 
-1. Connect the RGB LED to pins PF1, PF2, and PF3.
-2. Connect push button SW1 to pin PF4 and SW2 to pin PF0.
-3. Flash the provided code onto the TIVA C Series LaunchPad.
-4. Run the project, and you can cycle through colors with SW1 and adjust blinking speed with SW2.
+1. Clone or download the project repository.
+2. Open the project in your preferred IDE (Integrated Development Environment).
+3. Build and flash the code to the TM4C123GH6PM microcontroller.
+4. Run the project, and observe the LED blinking behavior.
+5. Press SW1 to change the LED color.
+6. Press SW2 to adjust the blinking delay.
+
+## Code Structure
+
+The code is organized into the following sections:
+
+- **Macro Definitions:** Defines pins, colors, and various constants used in the code.
+- **Global Variables:** Declarations of global variables used in the main program.
+- **Functions:**
+  - `delayMs`: Implements a delay in milliseconds.
+  - `delayMs_check`: Adds functionality to `delayMs` by checking for button presses during the delay.
+  - `update_color`: Updates the LED color based on the selected color.
+  - `main`: The main program that controls the LED blinking based on button inputs.
 
 ## Author
 
