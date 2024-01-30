@@ -1,3 +1,6 @@
+// UJJWAL CHAUDHARY, 22577, M. Tech. ESE, IISc Bengaluru
+// LAB 03
+
 #include <stdint.h>
 #include <stdbool.h>
 #include <ctype.h>
@@ -243,7 +246,6 @@ int validate_and_run_cmd_freq() {
 
 void run_command() {
     int validate=0;
-    test_command();
     switch(command[0])
     {
     case 'c' : {validate = validate_and_run_cmd_color();
@@ -277,7 +279,6 @@ void correct_cmd(){
         raw_command++;
     }
     correct_cmd[correct_cmd_index] = NULL_CHAR;
-    int flag=0;
     char correct_cmd_temp[MAX_BUFFER_SIZE];
 
     if(sscanf(correct_cmd, " %s", correct_cmd_temp) == 1) {
