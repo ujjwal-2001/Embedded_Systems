@@ -13,6 +13,23 @@ This C program is part of the Lab 3 assignment for the Embedded Systems course (
 - **Command Format for Color Change**: `color <color_name>`
 - **Command Format for Blink Rate Change**: `blink <blink_rate>`
 
+## Macros
+
+### Ports
+- `PIN0`, `PIN1`, `PIN2`, `PIN3`, `PIN4`: Represent bit positions for different pins.
+  
+### Colors
+- `COLOR_GREEN_ON`, `COLOR_BLUE_ON`, `COLOR_CYAN_ON`, `COLOR_RED_ON`, `COLOR_YELLOW_ON`, `COLOR_MAGENTA_ON`, `COLOR_WHITE_ON`, `NO_COLOR`: Macros for controlling LED colors.
+
+### Variables
+- `MAX_BLINK_DELAY`, `MIN_BLINK_DELAY`, `DEBOUNCING_DELAY`, `MAX_BUFFER_SIZE`, `BAUD_RATE`: Constants for configuration.
+
+### Characters
+- `NEW_LINE`, `ENTER`, `SPACE`, `TAB`, `BACKSPACE`, `NULL_CHAR`: Constants representing special characters.
+
+### Conditions
+- `SW1`, `SW2`: Macros for checking the state of switches.
+
 ## Getting Started
 
 Follow these steps to get started with the program:
@@ -47,14 +64,6 @@ If you're using UART commands, refer to the following guidelines:
 - Change LED color to blue: `color blue`
 - Set LED blink rate to 5: `blink 5`
 
-## Troubleshooting
+## Author
 
-If you encounter any issues or have questions, refer to the Troubleshooting section in the program documentation or contact the course instructor.
-
-## Contributing
-
-If you'd like to contribute to the development of this program, please follow the guidelines outlined in the CONTRIBUTING.md file.
-
-## License
-
-This project is licensed under the [MIT License](LICENSE).
+[UJJWAL CHAUDHARY, M. Tech. ESE 2023-25, IISc Bengaluru](https://www.linkedin.com/in/ujjwal-chaudhary-4436701aa/)
