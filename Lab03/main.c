@@ -50,7 +50,9 @@ int main ()
     while(1)
     {
         GPIO_PORTF_DATA_R = color;
+        check_press();
         delayMs(blink_delay);
+        check_press();
         GPIO_PORTF_DATA_R = 0x00;
         check_press();
         delayMs(blink_delay);
