@@ -56,7 +56,7 @@ uint8_t delay;
 int blink_delay = MAX_BLINK_DELAY;
 int select_color = 0;
 uint8_t color = COLOR_GREEN_ON;
-char colors_list[7][7] ={ "green", "blue", "cyan", "red", "yellow", "magenta", "white"};
+char colors_list[7][8] ={ "green", "blue", "cyan", "red", "yellow", "magenta", "white"};
 char command[MAX_BUFFER_SIZE]={NULL_CHAR};
 int cmd_char_index = 0;
 
@@ -190,7 +190,6 @@ void check_command(){
                 UARTCharPut(UART0_BASE, SPACE);
                 UARTCharPut(UART0_BASE, BACKSPACE);
                 cmd_char_index--;
-                command[cmd_char_index] = NULL_CHAR;
             }
 
             command[cmd_char_index] = tolower(input_char);
@@ -216,7 +215,7 @@ void clearBuffer() {
 }
 
 int validate_and_run_cmd_color() {
-    char entered_color[7];
+    char entered_color[8];
     if (sscanf(command, "color%s", entered_color) == 1) {
         for (int i=0; i < 7; i++) {
             if (strcmp(entered_color, colors_list[i]) == 0) {
