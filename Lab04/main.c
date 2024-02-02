@@ -65,6 +65,9 @@
 #define DIGIT_3 0x40
 #define DIGIT_4 0x80
 #define SEGMENT_DELAY 1 // in ms
+// 4x4 Keypad
+#define COL1 (GPIO_PORTC_DATA_R & 0x10)
+#define COL2 (GPIO_PORTC_DATA_R & 0x20)
 
 //GLOBAL VARIABLES
 
@@ -72,6 +75,7 @@ uint8_t delay;
 int blink_delay = MAX_BLINK_DELAY;
 int select_color = 0;
 int color_change_count = 0;
+int pause = FALSE;
 uint8_t color = COLOR_GREEN_ON;
 char colors_list[7][8] ={ "green", "blue", "cyan", "red", "yellow", "magenta", "white"};
 char command[MAX_BUFFER_SIZE]={NULL_CHAR};
@@ -103,11 +107,16 @@ int main ()
 
     while(1)
     {   
-        GPIO_PORTF_DATA_R = color;
+        if(!pause) 
+            GPIO_PORTF_DATA_R = color;
+        
         check_input();
         delay_and_display(blink_delay);
         check_input();
-        GPIO_PORTF_DATA_R = NO_COLOR;
+        
+        if(!pause)
+            GPIO_PORTF_DATA_R = NO_COLOR;
+        
         check_input();
         delay_and_display(blink_delay);
         check_input();
@@ -139,6 +148,13 @@ void Initialize(){
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
     GPIOPinTypeGPIOOutput(GPIO_PORTB_BASE, 0xFF);
     GPIOPinTypeGPIOOutput(GPIO_PORTA_BASE, 0xFF);
+
+    // Configure 4x4 Keypad
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOE);
+    GPIOPinTypeGPIOOutputOD(GPIO_PORTE_BASE, 0x0F);
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOC);
+    GPIOPinTypeGPIOInput(GPIO_PORTC_BASE, 0xF0);
+    GPIOPadConfigSet(GPIO_PORTC_BASE, 0xF0, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPU);
 }
 
 void update_color(){
@@ -185,7 +201,33 @@ void delay_and_display(int n){
 }
 
 void check_input(){
-    if(!SW1)
+    
+    if(!COL1)   // pause and play
+    {
+        delay_and_display(DEBOUNCING_DELAY);
+        while(!COL1){
+            display_color_code();
+            display_color_count();
+        } // Wait until COL1 is released
+        pause = !pause;
+        GPIO_PORTF_DATA_R = NO_COLOR;
+    }
+
+    if(!COL2)   // reset
+    {
+        delay_and_display(DEBOUNCING_DELAY);
+        while(!COL2){
+            display_color_code();
+            display_color_count();
+        } // Wait until COL1 is released
+        select_color = 0;
+        update_color();
+        color_change_count = 0;
+        GPIO_PORTF_DATA_R = NO_COLOR;
+        blink_delay = MAX_BLINK_DELAY;
+    }
+    
+    if(!SW1 && !pause)
     {
         delay_and_display(DEBOUNCING_DELAY);
         while(!SW1){
@@ -196,7 +238,7 @@ void check_input(){
         update_color();
     }
 
-    if(!SW2)
+    if(!SW2 && !pause)
     {
         delay_and_display(DEBOUNCING_DELAY);
         while(!SW2){
@@ -347,6 +389,7 @@ int int_to_display_num(int num){
         case 7: return DISPLAY_NUM_7;
         case 8: return DISPLAY_NUM_8;
         case 9: return DISPLAY_NUM_9;
+        default: return DISPLAY_NUM_0;
     }
 }
 
@@ -357,6 +400,7 @@ void display_color_code(){
 }
 
 void display_color_count(){
+    color_change_count = color_change_count%100; // keeping color count within 2 digits
     int once_digit = color_change_count%10;
     int tens_digit = color_change_count/10;
     GPIO_PORTB_DATA_R = int_to_display_num(once_digit);
