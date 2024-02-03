@@ -1,7 +1,7 @@
 # Lab 4 Assignment - Embedded Systems (E3-257)
 
 ## Description
-This C program is part of the Lab 4 assignment for the Embedded Systems course (E3-257).This program is designed to control the blinking of an LED with various colors on a TM4C123GH6PM microcontroller. The program supports UART communication for user commands, allowing users to change LED colors, adjust the blink rate, pause, resume, stop, and restart the LED blinking. The LED color and count are displayed on a 7-segment display.
+This C program is part of the Lab 4 assignment for the Embedded Systems course (E3-257). This program is designed to control the blinking of an LED with various colors on a TM4C123GH6PM microcontroller. The program supports UART communication for user commands, allowing users to change LED colors, adjust the blink rate, pause, resume, stop, and restart the LED blinking. Same commands can be given via buttons. The LED color and count are displayed on a 7-segment display.
 
 ## Hardware Requirements
 - **Microcontroller:** TM4C123GH6PM
@@ -54,7 +54,7 @@ The program supports the following UART commands:
 5. `stop`: Stop the LED blinking.
 6. `start`: Start the LED blinking (if stopped).
 
-- **Switch Control**:
+## Switch/Key Control
   - Press SW1 to cycle through LED colors.
   - Press SW2 to adjust the LED blink rate.
   - Press any key of 1st column of 4x4 Key pad to pause/resume.
