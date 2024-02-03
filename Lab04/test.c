@@ -94,13 +94,12 @@ void UARTPrint(char statement[]);
 void clearBuffer();
 int validate_cmd_color();
 int validate_cmd_freq();
-int validate_cmd_pause();
-int validate_cmd_resume();
 void run_command();
 void correct_cmd();
 int int_to_display_num(int num);
 void display_color_code();
 void display_color_count();
+void test_command();
 
 //MAIN
 
@@ -109,19 +108,19 @@ int main ()
     Initialize();
 
     while(1)
-    {   
+    {   UARTPrint("\n\rDebug\n\r");
         if(!pause) 
             GPIO_PORTF_DATA_R = color;
         
         check_input();
-        delay_and_display(blink_delay);
+        delayMs(blink_delay);
         check_input();
         
         if(!pause)
             GPIO_PORTF_DATA_R = NO_COLOR;
         
         check_input();
-        delay_and_display(blink_delay);
+        delayMs(blink_delay);
         check_input();
     }
 }
@@ -151,17 +150,10 @@ void Initialize(){
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
     GPIOPinTypeGPIOOutput(GPIO_PORTB_BASE, 0xFF);
     GPIOPinTypeGPIOOutput(GPIO_PORTA_BASE, 0xF0);
-
-    // Configure 4x4 Keypad
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOE);
-    GPIOPinTypeGPIOOutputOD(GPIO_PORTE_BASE, 0x0F);
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOC);
-    GPIOPinTypeGPIOInput(GPIO_PORTC_BASE, 0xF0);
-    GPIOPadConfigSet(GPIO_PORTC_BASE, 0xF0, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPU);
 }
 
 void update_color(){
-    uint8_t prev_color = color;
+    color_change_count++;
     switch(select_color) {
             case 0:
                 color = COLOR_GREEN_ON;
@@ -185,10 +177,6 @@ void update_color(){
                 color = COLOR_WHITE_ON;
                 break;
         }
-
-    if(prev_color != color){
-        color_change_count++;
-    }
 }
 
 void delayMs(int n)
@@ -208,39 +196,6 @@ void delay_and_display(int n){
 }
 
 void check_input(){
-    
-    if(!COL1 && reset_flag == 0)   // pause/resume
-    {
-        delay_and_display(DEBOUNCING_DELAY);
-        while(!COL1){
-            display_color_code();
-            display_color_count();
-        } // Wait until COL1 is released
-        pause = !pause;
-        GPIO_PORTF_DATA_R = NO_COLOR;
-    }
-
-    if(!COL2)   // reset/play
-    {
-        delay_and_display(DEBOUNCING_DELAY);
-        while(!COL2){
-            display_color_code();
-            display_color_count();
-        } // Wait until COL1 is released
-        if(reset_flag==0) // First press
-        {   
-            reset_flag++;
-            select_color = 0;
-            update_color();
-            color_change_count = 0;
-            GPIO_PORTF_DATA_R = NO_COLOR;
-            blink_delay = MAX_BLINK_DELAY;
-            pause = TRUE;
-        }else{          // Second press
-            pause = FALSE;
-            reset_flag = 0;
-        }
-    }
     
     if(!SW1 && !pause)
     {
@@ -281,20 +236,23 @@ void check_command(){
             if (input_char == ENTER) {
                 correct_cmd();
                 run_command();
-            } else if (input_char == BACKSPACE) {
-                UARTCharPut(UART0_BASE, BACKSPACE);
+            }
+
+            if (input_char != TAB) {
+                UARTCharPut(UART0_BASE, input_char);
+            } else {
+                UARTCharPut(UART0_BASE, SPACE);
+            }
+
+            if (input_char == BACKSPACE) {
                 UARTCharPut(UART0_BASE, SPACE);
                 UARTCharPut(UART0_BASE, BACKSPACE);
                 cmd_char_index--;
                 command[cmd_char_index] = NULL_CHAR;
-            } else if (input_char == TAB) {
-                UARTCharPut(UART0_BASE, SPACE);
-                input_char = SPACE;
-            } else {
-                UARTCharPut(UART0_BASE, input_char);
-                command[cmd_char_index] = input_char;
-                cmd_char_index++;
             }
+
+            command[cmd_char_index] = tolower(input_char);
+            cmd_char_index++;
         }
     } else {
         UARTPrint("\n\rInput cannot exeed 30 characters. Clearing input buffer.\n\r");
@@ -344,52 +302,9 @@ int validate_and_run_cmd_freq() {
     return FALSE;
 }
 
-int validate_and_run_cmd_pause() {
-    if (command[0] == 'p' && command[1] == 'a' && command[2] == 'u' && command[3] == 's' && command[4] == 'e' && command[5] == NULL_CHAR && reset_flag == 0) {
-        pause = TRUE;
-        GPIO_PORTF_DATA_R = NO_COLOR;
-        return TRUE;
-    }
-    return FALSE;
-}
-
-int validate_and_run_cmd_resume() {
-    if (command[0] == 'r' && command[1] == 'e' && command[2] == 's' && command[3] == 'u' && command[4] == 'm' && command[5] == 'e' && command[6] == NULL_CHAR && reset_flag == 0) {
-        if (pause == TRUE)
-        {
-            pause = FALSE;
-            return TRUE;
-        }
-    }
-    return FALSE;
-}
-
-int validate_and_run_cmd_restart(){
-    if (command[0] == 's' && command[1] == 't' && command[2] == 'o' && command[3] == 'p' && command[4] == NULL_CHAR) {
-        if(reset_flag==0) // First press
-        {   
-            reset_flag++;
-            select_color = 0;
-            update_color();
-            color_change_count = 0;
-            GPIO_PORTF_DATA_R = NO_COLOR;
-            blink_delay = MAX_BLINK_DELAY;
-            pause = TRUE;
-            return TRUE;
-        }
-    } else if (command[0] == 's' && command[1] == 't' && command[2] == 'a' && command[3] == 'r' && command[4] == 't' && command[5] == NULL_CHAR) {
-        if(reset_flag) // Second press
-        {   
-            pause = FALSE;
-            reset_flag = 0;
-            return TRUE;
-        }
-    }
-    return FALSE;
-}
-
 void run_command() {
     int validate=0;
+    test_command();
     switch(command[0])
     {
     case 'c' : {    // color
@@ -402,21 +317,6 @@ void run_command() {
         clearBuffer();
         }
         break;
-    case 'p' : {    // pause
-        validate = validate_and_run_cmd_pause();
-        clearBuffer();
-        }
-        break;
-    case 'r' : {    // resume 
-        validate = validate_and_run_cmd_resume();
-        clearBuffer();
-        }
-        break;
-    case 's' : {    // restart
-        validate = validate_and_run_cmd_restart();
-        clearBuffer();
-        }
-        break;
     default: clearBuffer();
     }
 
@@ -425,10 +325,7 @@ void run_command() {
               \n\r [1] color <color name> ; color name must be green, blue, cyan, red, yellow, magenta or white.\
               \n\r [2] blink <blink rate> ; blink rate must be an integer. It is the frequency of LED blinking.\
               \n\r [3] pause ; to pause the LED blinking.\
-              \n\r [4] resume ; to resume the LED blinking (Provided LED blinking is paused).\
-              \n\r [5] stop ; to stop the LED blinking.\
-              \n\r [6] start ; to start the LED blinking (Provided LED blinking is stopped).\n\r"
-              );
+              \n\r [4] resume ; to resume the LED blinking (Provided LED blinking is paused).\n\r");
     }
     clearBuffer();
 }
@@ -489,3 +386,32 @@ void display_color_count(){
     delayMs(SEGMENT_DELAY);
 }
 
+void test_command(){
+    for (int i = 0; i < 30; i++)
+    {
+        if(command[i] == NULL_CHAR){
+           UARTPrint("command[");
+           UARTCharPut(UART0_BASE, (char)(i+48));
+           UARTPrint("]: null char\n\r");
+        }else if(command[i] == SPACE){
+           UARTPrint("command[");
+           UARTCharPut(UART0_BASE, (char)(i+48));
+           UARTPrint("]: space\n\r");
+        }else if(command[i] == TAB){
+           UARTPrint("command[");
+           UARTCharPut(UART0_BASE, (char)(i+48));
+           UARTPrint("]: tab\n\r");
+        }else if(command[i] == BACKSPACE){
+           UARTPrint("command[");
+           UARTCharPut(UART0_BASE, (char)(i+48));
+           UARTPrint("]: backspace\n\r");
+        }else{
+           UARTPrint("command[");
+           UARTCharPut(UART0_BASE, (char)(i+48));
+           UARTPrint("]: ");
+           UARTCharPut(UART0_BASE, command[i]);
+           UARTPrint("\n\r");
+        }
+    }
+
+}
