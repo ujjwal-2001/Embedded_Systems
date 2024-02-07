@@ -289,8 +289,9 @@ void check_command(){
                 command[cmd_char_index] = NULL_CHAR;
             } else if (input_char == TAB) {
                 UARTCharPut(UART0_BASE, SPACE);
-                input_char = SPACE;
-            } else {
+            } else if (input_char == SPACE) {
+                UARTCharPut(UART0_BASE, SPACE);
+            }else {
                 UARTCharPut(UART0_BASE, input_char);
                 command[cmd_char_index] = input_char;
                 cmd_char_index++;
@@ -439,7 +440,7 @@ void correct_cmd(){
     int correct_cmd_index = 0;
     while(*raw_command) {
         if (((*raw_command) != SPACE) & ((*raw_command) != TAB) & ((*raw_command) != NULL_CHAR) & ((*raw_command) != BACKSPACE)) {
-            correct_cmd[correct_cmd_index] = (*raw_command);
+            correct_cmd[correct_cmd_index] = tolower((*raw_command));
             correct_cmd_index++;
         }
         raw_command++;
@@ -488,4 +489,3 @@ void display_color_count(){
     GPIO_PORTA_DATA_R = DIGIT_4;
     delayMs(SEGMENT_DELAY);
 }
-
