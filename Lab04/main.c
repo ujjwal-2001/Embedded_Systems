@@ -1,5 +1,5 @@
 // UJJWAL CHAUDHARY, 22577, M. Tech. ESE, IISc Bengaluru
-// LAB 03
+// LAB 04
 
 #include <stdint.h>
 #include <stdbool.h>
