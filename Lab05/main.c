@@ -481,15 +481,6 @@ int validate_and_run_cmd_peek(){
 
 int validate_and_run_cmd_poke(){
     if (command[0] == 'p' && command[1] == 'o' && command[2] == 'k' && command[3] == 'e') {
-        // adding a space between the address and bytes
-        // Eg. command = p   o   k   e   0   x   2   0   0   0   0   0   0   0   1   0   1
-        //               0   1   2   3   4   5   6   7   8   9   10  11  12  13  14  15  16
-        // For extracting address and bytes, we can use sscanf with format "poke %d %d %d"
-        // Need to make command = poke0x20000000 1000 1
-        for(int i=MAX_BUFFER_SIZE-3; i>=15; i--){
-            command[i+1] = command[i];
-        }
-        command[15] = SPACE;
         int address, bytes;
         char data[100];
         if (sscanf(command, "poke%x %d %s", &address, &bytes, data) == 3) {
