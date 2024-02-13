@@ -35,7 +35,7 @@
 #define MAX_BLINK_DELAY 1000    // in ms
 #define MIN_BLINK_DELAY 100     // in ms
 #define DEBOUNCING_DELAY 50     // in ms
-#define MAX_BUFFER_SIZE 30      // in bytes
+#define MAX_BUFFER_SIZE 50      // in bytes
 #define BAUD_RATE 115200
 // Characters
 #define NEW_LINE '\n'
@@ -324,9 +324,7 @@ void check_command(){
                 command[cmd_char_index] = NULL_CHAR;
             } else if (input_char == TAB) {
                 UARTCharPut(UART0_BASE, SPACE);
-            } else if (input_char == SPACE) {
-                UARTCharPut(UART0_BASE, SPACE);
-            }else {
+            } else {
                 UARTCharPut(UART0_BASE, input_char);
                 command[cmd_char_index] = input_char;
                 cmd_char_index++;
@@ -457,9 +455,50 @@ int validate_and_run_cmd_peek(){
                 }
                 UARTPrint("\n\rData at given address is: ");
                 for (int i=0; i<bytes; i++) {
-                    UARTCharPut(UART0_BASE, data[i]);
+                    if(data[i]==NULL_CHAR){
+                        UARTPrint("_NULL_");
+                    }else if (data[i]==NEW_LINE){
+                        UARTPrint("_NEW LINE_");
+                    }else if (data[i]==ENTER){
+                        UARTPrint("_ENTER_");
+                    }else if(data[i]==SPACE){
+                        UARTPrint("_SPACE_");
+                    }else if(data[i]==TAB){
+                        UARTPrint("_TAB_");
+                    }else if(data[i]==BACKSPACE){
+                        UARTPrint("_BACKSPACE_");
+                    }else{
+                        UARTCharPut(UART0_BASE, data[i]);
+                    }
                 }
                 UARTPrint("\n\r");
+                return TRUE;
+            }
+        }
+    }
+    return FALSE;
+}
+
+int validate_and_run_cmd_poke(){
+    if (command[0] == 'p' && command[1] == 'o' && command[2] == 'k' && command[3] == 'e') {
+        // adding a space between the address and bytes
+        // Eg. command = p   o   k   e   0   x   2   0   0   0   0   0   0   0   1   0   1
+        //               0   1   2   3   4   5   6   7   8   9   10  11  12  13  14  15  16
+        // For extracting address and bytes, we can use sscanf with format "poke %d %d %d"
+        // Need to make command = poke0x20000000 1000 1
+        for(int i=MAX_BUFFER_SIZE-3; i>=15; i--){
+            command[i+1] = command[i];
+        }
+        command[15] = SPACE;
+        int address, bytes;
+        char data[100];
+        if (sscanf(command, "poke%x %d %s", &address, &bytes, data) == 3) {
+            if (address >= 0x20000000 && address <= 0x20008000 && bytes > 0 && bytes <= 100) {
+                for (int i=0; i<bytes; i++) {
+                    *((char*)address + i) = data[i];
+                }
+                UARTPrint("\n\rData written to given address.\n\r");
+                LCD_display();
                 return TRUE;
             }
         }
@@ -489,7 +528,7 @@ void run_command() {
                 validate = validate_and_run_cmd_peek();
                 clearBuffer();
             } else if (command[1] == 'o') {
-                //validate = validate_and_run_cmd_poke();
+                validate = validate_and_run_cmd_poke();
                 clearBuffer();
             }
         }
@@ -518,6 +557,7 @@ void correct_cmd(){
     char *raw_command = command;
     char correct_cmd[MAX_BUFFER_SIZE];
     int correct_cmd_index = 0;
+
     while(*raw_command) {
         if (((*raw_command) != SPACE) & ((*raw_command) != TAB) & ((*raw_command) != NULL_CHAR) & ((*raw_command) != BACKSPACE)) {
             correct_cmd[correct_cmd_index] = tolower((*raw_command));
@@ -527,9 +567,40 @@ void correct_cmd(){
     }
     correct_cmd[correct_cmd_index] = NULL_CHAR;
     char correct_cmd_temp[MAX_BUFFER_SIZE];
+    // Special case of poke commands
+    char correct_cmd2[MAX_BUFFER_SIZE];
+    int correct_cmd_index2 = 0;
 
-    if(sscanf(correct_cmd, " %s", correct_cmd_temp) == 1) {
+    if(correct_cmd[0] == 'p' && correct_cmd[1] == 'o' && correct_cmd[2] == 'k' && correct_cmd[3] == 'e') {
+        int space_flag = 0;
+        correct_cmd2[0] = 'p';
+        correct_cmd2[1] = 'o';
+        correct_cmd2[2] = 'k';
+        correct_cmd2[3] = 'e';
+        correct_cmd_index2 = 4;
+       for(int i=4; i<MAX_BUFFER_SIZE; i++) {
+           if(command[i] != SPACE){
+                correct_cmd2[correct_cmd_index2++] = command[i];
+           }else if(space_flag <= 1){
+            correct_cmd2[correct_cmd_index2++] = SPACE;
+            space_flag++;
+            while(command[i] == SPACE){
+                i++;
+            }
+            i--;
+           }else {
+                correct_cmd2[correct_cmd_index2++] = command[i];
+           }
+       }
+        correct_cmd2[correct_cmd_index2] = NULL_CHAR;
+        
+        if(sscanf(correct_cmd, " %s", correct_cmd_temp) == 1) {
         strcpy(correct_cmd, correct_cmd_temp);
+        }
+
+        strcpy(command, correct_cmd2);
+        UARTPrint("\n\r");
+        return;
     }
 
     strcpy(command, correct_cmd);
