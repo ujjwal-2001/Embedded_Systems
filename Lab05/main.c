@@ -92,7 +92,7 @@ uint8_t color = COLOR_GREEN_ON;
 char colors_list[7][8] ={ "green", "blue", "cyan", "red", "yellow", "magenta", "white"};
 char command[MAX_BUFFER_SIZE]={NULL_CHAR};
 int cmd_char_index = 0;
-char version_str[] = "Version 0.01";
+extern char version_str[] __attribute__((section(".version_str"))) = "Version 0.01";
 
 //FUNCTION PROTOTYPES
 
@@ -483,7 +483,7 @@ int validate_and_run_cmd_poke(){
     if (command[0] == 'p' && command[1] == 'o' && command[2] == 'k' && command[3] == 'e') {
         int address, bytes;
         char data[100];
-        if (sscanf(command, "poke%x %d %s", &address, &bytes, data) == 3) {
+        if (sscanf(command, "poke%x %d %[^\n]", &address, &bytes, data) == 3) {
             if (address >= 0x20000000 && address <= 0x20008000 && bytes > 0 && bytes <= 100) {
                 for (int i=0; i<bytes; i++) {
                     *((char*)address + i) = data[i];
