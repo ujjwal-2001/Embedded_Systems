@@ -92,7 +92,7 @@ uint8_t color = COLOR_GREEN_ON;
 char colors_list[7][8] ={ "green", "blue", "cyan", "red", "yellow", "magenta", "white"};
 char command[MAX_BUFFER_SIZE]={NULL_CHAR};
 int cmd_char_index = 0;
-extern char version_str[] __attribute__((section(".version_str"))) = "Version 0.01";
+char version_str[] = "Version 0.01";
 
 //FUNCTION PROTOTYPES
 
