@@ -179,11 +179,11 @@ The main function initializes the microcontroller and peripherals, entering an i
 
 ## User Commands
 The program supports the following UART commands:
-3. `pause`: Pause the Stop Watch.
-4. `resume`: Resume the Stop Watch (if paused).
-5. `stop`: Stop the Stop Watch.
-6. `start`: Start the Stop Watch (if stopped).
-7. `tictactoe`: To start Tic-Tac-Toe game.
+1. `pause`: Pause the Stop Watch.
+2. `resume`: Resume the Stop Watch (if paused).
+3. `stop`: Stop the Stop Watch.
+4. `start`: Start the Stop Watch (if stopped).
+5. `tictactoe`: To start Tic-Tac-Toe game.
 
 ## Switch/Key Control
   - Press SW1 to Stop Watch Pause/Resume.
