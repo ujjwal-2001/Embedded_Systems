@@ -434,6 +434,7 @@ void initialize_tictactoe(){
             TicTacToe[i][j] = 0;    // 0 = nothing, -1 = 'O', 1 = 'X'
         }
     }
+    TicTacToe_winner = 0;
 }
 
 void print_tictactoe(){
@@ -490,7 +491,6 @@ void check_winner_tictactoe(){
         }else{
             UARTPrint("\n\r Player 2 (O) wins!\n\r");
         }
-        TicTacToe_winner = 0;
     }else if(TicTacToe_moves == 9){
         TicTacToe_game = FALSE;
         UARTPrint("\n\r It's a draw!\n\r");
