@@ -146,7 +146,7 @@ int main ()
         temp=(((result)/4095.0)*4999.0);
         temp2=(int)temp;
         pwm_value = 4999-temp2;
-        PWM1_3_CMPA_R= pwm_value;
+        PWM1_1_CMPA_R= pwm_value;
         long temp_blink_delay = (MAX_BLINK_DELAY* pwm_value)/4999; // x value is withing [4999-0]
         
         if((temp_blink_delay-blink_delay >= 30) || temp_blink_delay-blink_delay <= -30){
