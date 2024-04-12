@@ -2,3 +2,5 @@
 *.pptx
 .vscode/settings.json
 Lab03/tempCodeRunnerFile.c
+.vscode/tasks.json
+Lab01/main.exe
