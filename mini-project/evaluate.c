@@ -19,6 +19,8 @@ void push(Stack* s, double val) {
         exit(EXIT_FAILURE);
     }
     s->items[++(s->top)] = val;
+    printf("Pushed %f\n", val);
+    print_stack(s);
 }
 
 // Pop item from stack
@@ -27,7 +29,10 @@ double pop(Stack* s) {
         printf("Stack Underflow\n");
         exit(EXIT_FAILURE);
     }
-    return s->items[(s->top)--];
+    double val = s->items[(s->top)--];
+    printf("Popped %f\n", val);
+    print_stack(s);
+    return val;
 }
 
 // Peek at the top item of the stack
@@ -42,6 +47,14 @@ double peek(Stack* s) {
 // Check if stack is empty
 int isempty(Stack* s) {
     return s->top == -1;
+}
+
+// Print stack
+void print_stack(Stack* s) {
+    for (int i = 0; i <= s->top; i++) {
+        printf("%f ", s->items[i]);
+    }
+    printf("\n");
 }
 
 // Operator precedence
@@ -127,6 +140,9 @@ double eval(const char* expr) {
                 } else if (op == 't') {
                     push(&valStack, tan(b));
                 } else if (op == 'l') {
+                    if (b < 0) {    // log of negative number is undefined
+                        return NAN;
+                    }
                     push(&valStack, log(b));
                 } else if (op == 'a') {
                     push(&valStack, abs(b));
@@ -139,7 +155,6 @@ double eval(const char* expr) {
         } else {
             while (!isempty(&opStack) && precedence(expr[i]) <= precedence(peek(&opStack))) {
                 double b = pop(&valStack);
-                double a = pop(&valStack);
                 char op = pop(&opStack);
                 if (op == 's') {
                     push(&valStack, sin(b));
@@ -148,8 +163,14 @@ double eval(const char* expr) {
                 } else if (op == 't') {
                     push(&valStack, tan(b));
                 } else if (op == 'l') {
+                    if (b < 0) {    // log of negative number is undefined
+                        return NAN;
+                    }
                     push(&valStack, log(b));
+                } else if (op == 'a') {
+                    push(&valStack, abs(b));
                 } else {
+                    double a = pop(&valStack);
                     push(&valStack, applyOp(a, b, op));
                 }
             }
@@ -168,6 +189,9 @@ double eval(const char* expr) {
         } else if (op == 't') {
             push(&valStack, tan(b));
         } else if (op == 'l') {
+            if (b < 0) {    // log of negative number is undefined
+                return NAN;
+            }
             push(&valStack, log(b));
         } else if (op == 'a') {
             push(&valStack, abs(b));
@@ -176,7 +200,7 @@ double eval(const char* expr) {
             push(&valStack, applyOp(a, b, op));
         }
     }
-
+    printf("about to pop Result: %f\n", peek(&valStack));
     return pop(&valStack);
 }
 
@@ -189,15 +213,31 @@ double eval(const char* expr) {
 char* bracket_adder(char* expr) {
     char* new_expr = malloc(strlen(expr) * 2 + 1);
     int j = 0;
+
+    if (expr[0]!='\0' && expr[0]=='-')
+    {
+        new_expr[j++] = '0';
+    } 
+
     for (int i = 0; expr[i] != '\0'; i++) {
         if (expr[i] == 's' || expr[i] == 'c' || expr[i] == 't' || expr[i] == 'l' || expr[i] == 'a') {
             new_expr[j++] = '(';
             while(expr[i] != ')') {
+                if (expr[i] == '(' && expr[i+1] == '-'){
+                    new_expr[j++] = '(';
+                    new_expr[j++] = '0';
+                    i++;
+                }
                 new_expr[j++] = expr[i++];
             }
             new_expr[j++] = expr[i];
             new_expr[j++] = ')';
 
+        } else if (expr[i] == '(' && expr[i+1] == '-') { // Replace (- with (0-
+            new_expr[j++] = '(';
+            new_expr[j++] = '0';
+            new_expr[j++] = '-';
+            i++;
         } else {
             new_expr[j++] = expr[i];
         }
@@ -221,14 +261,18 @@ double* x_vals(int n, int min, int max) {
 char* val_replacer(char* expr, double val) {
     char* new_expr = malloc(strlen(expr) * 2 + 1);
     int j = 0;
+
     for (int i = 0; expr[i] != '\0'; i++) {
-        if (expr[i] == 'x') {
+        if (expr[i] == 'x') {   // Replace x with value with (0val)
+            new_expr[j++] = '(';
+            new_expr[j++] = '0';
             char* num = malloc(20);
             sprintf(num, "%f", val);
             for (int k = 0; num[k] != '\0'; k++) {
                 new_expr[j++] = num[k];
             }
             free(num);
+            new_expr[j++] = ')';
         } else if (expr[i] == 'p' && expr[i + 1] == 'i'){
             new_expr[j++] = '3';
             new_expr[j++] = '.';
@@ -269,7 +313,10 @@ double* y_vals(int n, double* x, char* expr) {
     printf("%s\n", corrected_expr);
     for (int i = 0; i < n; i++) {
         char* new_expr = val_replacer(corrected_expr, x[i]);
+        printf("%s\n", new_expr);
         y[i] = eval(new_expr);
+        printf("y[%d]: %f\n", i, y[i]);
+        printf("%s\n", new_expr);
         free(new_expr);
     }
     return y;

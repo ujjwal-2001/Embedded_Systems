@@ -7,10 +7,10 @@
 void save_to_txt(double** points, int num_points, const char *filename);
 
 int main() {
-    char expression[]= "sincostan(x)";
-    int min = 1;
-    int max = 2;
-    int n = 500;
+    char expression[]= "-sin(-x)";
+    int min = -10;
+    int max = 10;
+    int n = 120;
     double** xy = xy_vals(n, min, max, expression);
 
     // print the x and y values
@@ -29,7 +29,12 @@ int main() {
     save_to_txt(xy, n, "points.txt ");
     printf("Data saved to %s\n", "points.txt ");
     save_to_txt(xy_mapped, n, "points_mapped.txt");
-    printf("Data saved to %s\n", "points_mapped .txt ");
+    printf("Data saved to %s\n", "points_mapped.txt ");
+
+    free(xy[0]);
+    free(xy[1]);
+    free(xy_mapped[0]);
+    free(xy_mapped[1]);
     return 0;
 }
 

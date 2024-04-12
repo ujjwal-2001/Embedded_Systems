@@ -20,6 +20,7 @@ void push(Stack* s, double val);                    // Push item onto stack
 double pop(Stack* s);                               // Pop item from stack
 double peek(Stack* s);                              // Peek at the top item of the stack
 int isempty(Stack* s);                              // Check if stack is empty
+void print_stack(Stack* s);                         // Print stack
 int precedence(char op);                            // Operator precedence
 double applyOp(double a, double b, char op);        // Apply operator to operands
 double eval(const char* expr);                      // Evaluate expression
