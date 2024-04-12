@@ -5,6 +5,8 @@
 #include <ctype.h>
 #include "evaluate.h"
 
+//---------------EVALUATION OF MATHEMATICAL EXPRESSIONS----------------
+
 // Initialize stack
 void init(Stack* s) {
     s->top = -1;
@@ -178,6 +180,9 @@ double eval(const char* expr) {
     return pop(&valStack);
 }
 
+
+//---------------GENERATION OF X AND Y VALUES----------------
+
 // Envolopes sin, cos, tan, log, and abs in brackets
 // Example input: "2*sin(3.14)+log(100)"
 // Example output: "2*(sin(3.14))+(log(100))"
@@ -276,4 +281,84 @@ double** xy_vals(int n, int min, int max, char* expr) {
     xy[0] = x_vals(n, min, max);
     xy[1] = y_vals(n, xy[0], expr);
     return xy;
+}
+
+
+//---------------MAPPING OF X AND Y VALUES TO SCREEN COORDINATES----------------
+
+// Find maximum value in an array of doubles ignoring NaN and Inf values
+double max(double* arr, int n) {
+    // initial value should not be NaN or Inf
+    int i=0;
+    double max;
+    while(isnan(arr[i]) || isinf(arr[i])) {
+        i++;
+    }
+    max = arr[i++];
+    for (; i < n; i++) {
+        if (arr[i] > max &&  !(isnan(arr[i]) || isinf(arr[i]))) {
+            max = arr[i];
+        }
+    }
+    return max;
+}
+
+// Find minimum value in an array of doubles ignoring NaN and Inf values
+double min(double* arr, int n) {
+    // initial value should not be NaN or Inf
+    int i=0;
+    double min;
+    while(isnan(arr[i]) || isinf(arr[i])) {
+        i++;
+    }
+    min = arr[i++];
+
+    for (; i < n; i++) {
+        if (arr[i] < min &&  !(isnan(arr[i]) || isinf(arr[i]))) {
+            min = arr[i];
+        }
+    }
+    
+    return min;
+}
+
+// Map x and y values to screen coordinates
+// (x1, y1), (x2, y2) are the screen coordinates - corners of the screen in pixcels
+// (x_min, x_max) are the minimum and maximum values of x
+double** map_xy(int n, double** xy, int x1, int y1,  int x2, int y2, double x_min, double x_max) {
+    double** mapped_xy = malloc(2 * sizeof(double*));
+    mapped_xy[0] = malloc(n * sizeof(double));
+    mapped_xy[1] = malloc(n * sizeof(double));
+
+    double y_min = min(xy[1], n);
+    double y_max = max(xy[1], n);
+    double x_range = x_max - x_min;
+    double y_range = y_max - y_min;
+    double x_scale = (x2 - x1) / x_range;
+    double y_scale = (y2 - y1) / y_range;
+    double x_offset = x1 - x_scale * x_min;
+    double y_offset = y1 - y_scale * y_min;
+
+    // printing all the values
+    printf("x1: %d\n", x1);
+    printf("y1: %d\n", y1);
+    printf("x2: %d\n", x2);
+    printf("y2: %d\n", y2);
+    printf("x_min: %f\n", x_min);
+    printf("x_max: %f\n", x_max);
+    printf("y_min: %f\n", y_min);
+    printf("y_max: %f\n", y_max);
+    printf("x_range: %f\n", x_range);
+    printf("y_range: %f\n", y_range);
+    printf("x_scale: %f\n", x_scale);
+    printf("y_scale: %f\n", y_scale);
+    printf("x_offset: %f\n", x_offset);
+    printf("y_offset: %f\n", y_offset);
+
+    for (int i = 0; i < n; i++) {
+        mapped_xy[0][i] = x_scale * xy[0][i] + x_offset;
+        mapped_xy[1][i] = y_scale * xy[1][i] + y_offset;
+    }
+
+    return mapped_xy;
 }
