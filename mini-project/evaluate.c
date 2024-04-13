@@ -19,8 +19,6 @@ void push(Stack* s, double val) {
         exit(EXIT_FAILURE);
     }
     s->items[++(s->top)] = val;
-    printf("Pushed %f\n", val);
-    print_stack(s);
 }
 
 // Pop item from stack
@@ -30,8 +28,6 @@ double pop(Stack* s) {
         exit(EXIT_FAILURE);
     }
     double val = s->items[(s->top)--];
-    printf("Popped %f\n", val);
-    print_stack(s);
     return val;
 }
 
@@ -200,7 +196,6 @@ double eval(const char* expr) {
             push(&valStack, applyOp(a, b, op));
         }
     }
-    printf("about to pop Result: %f\n", peek(&valStack));
     return pop(&valStack);
 }
 
@@ -211,7 +206,7 @@ double eval(const char* expr) {
 // Example input: "2*sin(3.14)+log(100)"
 // Example output: "2*(sin(3.14))+(log(100))"
 char* bracket_adder(char* expr) {
-    char* new_expr = malloc(strlen(expr) * 2 + 1);
+    char* new_expr = malloc(strlen(expr) * 2 + 1); // Maximum length of new expression is twice the length of the original expression
     int j = 0;
 
     if (expr[0]!='\0' && expr[0]=='-')
@@ -259,7 +254,7 @@ double* x_vals(int n, int min, int max) {
 
 // Replace variable with value and replace pi and e
 char* val_replacer(char* expr, double val) {
-    char* new_expr = malloc(strlen(expr) * 2 + 1);
+    char* new_expr = malloc(strlen(expr) * 2 + 100);
     int j = 0;
 
     for (int i = 0; expr[i] != '\0'; i++) {
@@ -310,13 +305,9 @@ char* val_replacer(char* expr, double val) {
 double* y_vals(int n, double* x, char* expr) {
     double* y = malloc(n * sizeof(double));
     char* corrected_expr = bracket_adder(expr);
-    printf("%s\n", corrected_expr);
     for (int i = 0; i < n; i++) {
         char* new_expr = val_replacer(corrected_expr, x[i]);
-        printf("%s\n", new_expr);
         y[i] = eval(new_expr);
-        printf("y[%d]: %f\n", i, y[i]);
-        printf("%s\n", new_expr);
         free(new_expr);
     }
     return y;
@@ -329,6 +320,154 @@ double** xy_vals(int n, int min, int max, char* expr) {
     xy[1] = y_vals(n, xy[0], expr);
     return xy;
 }
+
+//---------------ADDITIONAL OPERATIONS ON X AND Y VALUES----------------
+
+// Calculate the derivative of a function
+double ** derivative(int n, double** xy) {
+    double** dy_dx = malloc(2 * sizeof(double*));
+    dy_dx[0] = malloc(n * sizeof(double));
+    dy_dx[1] = malloc(n * sizeof(double));
+
+    for (int i = 0; i < n - 1; i++) {
+        dy_dx[0][i] = xy[0][i];
+        dy_dx[1][i] = (xy[1][i + 1] - xy[1][i]) / (xy[0][i + 1] - xy[0][i]);
+    }
+    dy_dx[0][n - 1] = xy[0][n - 1];
+    dy_dx[1][n - 1] = dy_dx[1][n - 2];
+
+    return dy_dx;
+}
+
+// Calculate the integral of a function
+double ** integral(int n, double** xy) {
+    double** integral = malloc(2 * sizeof(double*));
+    integral[0] = malloc(n * sizeof(double));
+    integral[1] = malloc(n * sizeof(double));
+
+    integral[0][0] = xy[0][0];
+    integral[1][0] = 0;
+
+    for (int i = 1; i < n; i++) {
+        integral[0][i] = xy[0][i];
+        integral[1][i] = integral[1][i - 1] + (xy[1][i] + xy[1][i - 1]) * (xy[0][i] - xy[0][i - 1]) / 2;
+    }
+
+    return integral;
+}
+
+// Calculate the area under the curve of a function
+double area_under_curve(int n, double** xy) {
+    double area = 0;
+    for (int i = 1; i < n; i++) {
+        area += (xy[1][i] + xy[1][i - 1]) * (xy[0][i] - xy[0][i - 1]) / 2;
+    }
+    return area;
+}
+
+// Calculate the bisection points of a function
+double ** bisection_points(int n, double** xy) {
+    double** bisection = malloc(2 * sizeof(double*));
+    bisection[0] = malloc(MAX_ZEROS * 2 * sizeof(double));
+    bisection[1] = malloc(MAX_ZEROS * 2 * sizeof(double));
+    int j=0;
+
+    //populate bisection points with NAN
+    for (int i = 0; i < MAX_ZEROS * 2; i++) {
+        bisection[0][i] = NAN;
+        bisection[1][i] = NAN;
+    }
+
+    for (int i = 0; i < n - 1; i++) {
+        double x1 = xy[0][i];
+        double x2 = xy[0][i + 1];
+        double y1 = xy[1][i];
+        double y2 = xy[1][i + 1];
+        if (y1 * y2 < 0) {
+            bisection[0][j] = x1;
+            bisection[1][j] = y1;
+            bisection[0][j + 1] = x2;
+            bisection[1][j + 1] = y2;
+            j += 2;
+        }
+    }
+
+    // printing all the values
+    printf("+++Bisection points\nx     y\n");
+    for (int i = 0; i < MAX_ZEROS * 2; i += 2) {
+        printf("%f %f\n", bisection[0][i], bisection[1][i]);
+        printf("%f %f\n", bisection[0][i + 1], bisection[1][i + 1]);
+    }
+
+    return bisection;
+}
+
+// Calculate the root using the bisection method with given points
+// returns NAN if the points do not have opposite signs or the root is not found
+double bisection_method(double point1[1][2], double point2[1][2], char* expr) {
+    double x1 = point1[0][0];
+    double x2 = point2[0][0];
+    double y1 = point1[0][1];
+    double y2 = point2[0][1];
+    char* corrected_expr = bracket_adder(expr);
+
+    if (y1 * y2 >= 0) {
+        printf("The points do not have opposite signs\n");
+        return NAN;
+    }
+
+    double x_mid = (x1 + x2) / 2;
+    double y_mid = eval(val_replacer(corrected_expr, x_mid));
+
+    for (int i = 0; i < MAX_ITERATIONS; i++) {
+        if (y_mid == 0 || (x2 - x1) / 2 < EPSILON) {
+            return x_mid;
+        }
+
+        if (y_mid * y1 < 0) {
+            x2 = x_mid;
+            y2 = y_mid;
+        } else {
+            x1 = x_mid;
+            y1 = y_mid;
+        }
+
+        x_mid = (x1 + x2) / 2;
+        y_mid = eval(val_replacer(corrected_expr, x_mid));
+    }
+
+    printf("Root not found\n");
+    return NAN;
+}
+
+// Calculate the zeros of a function
+Stack zeros_of_function(int n, double** xy, char* expr) {
+    Stack zeros;
+    init(&zeros);
+
+    // Find bisection points
+    double** bisection = bisection_points(n, xy);
+
+    // Find zeros
+    for (int i = 0; i < MAX_ZEROS * 2; i += 2) {
+        if(!isnan(bisection[0][i])){
+            double point1[1][2] = {{bisection[0][i], bisection[1][i]}};
+            double point2[1][2] = {{bisection[0][i + 1], bisection[1][i + 1]}};
+            double zero = bisection_method(point1, point2, expr);
+            if (!isnan(zero)) {
+                push(&zeros, zero);
+            }
+        }
+    }
+
+    printf("+++Zeros of the function\n");
+    print_stack(&zeros);
+    free(bisection[0]);
+    free(bisection[1]);
+
+    return zeros;
+}
+
 
 
 //---------------MAPPING OF X AND Y VALUES TO SCREEN COORDINATES----------------
@@ -385,22 +524,6 @@ double** map_xy(int n, double** xy, int x1, int y1,  int x2, int y2, double x_mi
     double y_scale = (y2 - y1) / y_range;
     double x_offset = x1 - x_scale * x_min;
     double y_offset = y1 - y_scale * y_min;
-
-    // printing all the values
-    printf("x1: %d\n", x1);
-    printf("y1: %d\n", y1);
-    printf("x2: %d\n", x2);
-    printf("y2: %d\n", y2);
-    printf("x_min: %f\n", x_min);
-    printf("x_max: %f\n", x_max);
-    printf("y_min: %f\n", y_min);
-    printf("y_max: %f\n", y_max);
-    printf("x_range: %f\n", x_range);
-    printf("y_range: %f\n", y_range);
-    printf("x_scale: %f\n", x_scale);
-    printf("y_scale: %f\n", y_scale);
-    printf("x_offset: %f\n", x_offset);
-    printf("y_offset: %f\n", y_offset);
 
     for (int i = 0; i < n; i++) {
         mapped_xy[0][i] = x_scale * xy[0][i] + x_offset;
