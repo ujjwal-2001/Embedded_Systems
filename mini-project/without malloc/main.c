@@ -9,7 +9,7 @@ void save_to_txt2(double points[2][N-1], const char *filename);
 
 int main() {
     initialize();
-    strcpy(__EXPR__, "sin(x+2) + log(x)");
+    strcpy(__EXPR__, "log(sin(x))");
     __X_MIN__ = -10;
     __X_MAX__ = 10;
     xy_vals();

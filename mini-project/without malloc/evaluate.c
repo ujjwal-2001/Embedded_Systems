@@ -358,12 +358,18 @@ void derivative() {
 
 // Calculate the integral of a function
 void integral() {
-    __INTEGRAL_XY__[0][0] = __XY__[0][0];
-    __INTEGRAL_XY__[1][0] = 0;
 
-    for (int i = 1; i < N-1; i++) {
-        __INTEGRAL_XY__[0][i] = __XY__[0][i];
-        __INTEGRAL_XY__[1][i] = __INTEGRAL_XY__[1][i - 1] + (__XY__[1][i] + __XY__[1][i - 1]) * (__XY__[0][i] - __XY__[0][i - 1]) / 2;
+    double last_valid_value = 0;
+
+    for(int i=0; i<N-1; i++){
+        if (isinf(__XY__[1][i]) || isnan(__XY__[1][i]) || isinf(__XY__[1][i+1]) || isnan(__XY__[1][i+1])) {
+            __INTEGRAL_XY__[0][i] = (__XY__[0][i + 1] + __XY__[0][i]) / 2;
+            __INTEGRAL_XY__[1][i] = NAN;
+            continue;
+        }
+        __INTEGRAL_XY__[0][i] = (__XY__[0][i + 1] + __XY__[0][i]) / 2;
+        __INTEGRAL_XY__[1][i] = last_valid_value + (__XY__[1][i] + __XY__[1][i + 1]) * (__XY__[0][i + 1] - __XY__[0][i]) / 2;
+        last_valid_value = __INTEGRAL_XY__[1][i];
     }
 }
 

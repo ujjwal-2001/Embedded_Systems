@@ -9,7 +9,7 @@
 #define EPSILON 0.000001        // value of epsilon
 #define MAX_ITERATIONS 70       // maximum number of iterations for bisection method
 #define MAX_ZEROS 10            // maximum number of zeros of a function
-#define N 500                   // maximum number of points
+#define N 800                   // maximum number of points
 #define EXP_LEN 150             // maximum length of the expression
 
 #include "evaluate.h"
