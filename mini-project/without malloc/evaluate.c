@@ -5,6 +5,26 @@
 #include <ctype.h>
 #include "evaluate.h"
 
+// GLOBAL VARIABLES
+char expr[EXP_LEN];                  // expression to be evaluated (x)
+char expr_val[EXP_LEN];              // expression to be evaluated (number)
+int bracket_flag;                    // flag to check if brackets are added
+double xy[2][N];                     // x values
+double mapped_xy[2][N];              // x values mapped to screen coordinates
+double dy_dx[2][N-1];                // derivative values
+double integral_xy[2][N-1];            // integral values
+double area;                         // area under the curve
+double bisection[MAX_ZEROS][2];      // bisection points
+Stack zeros;                         // zeros of the function
+
+// INITIALIZATION
+void initialize() {
+    strcpy(expr, "");
+    bracket_flag = 0;
+    init(&zeros);
+    area = 0;
+}
+
 //---------------EVALUATION OF MATHEMATICAL EXPRESSIONS----------------
 
 // Initialize stack
@@ -205,68 +225,69 @@ double eval(const char* expr) {
 // Envolopes sin, cos, tan, log, and abs in brackets
 // Example input: "2*sin(3.14)+log(100)"
 // Example output: "2*(sin(3.14))+(log(100))"
-char* bracket_adder(char* expr) {
-    char* new_expr = malloc(strlen(expr) * 2 + 1); // Maximum length of new expression is twice the length of the original expression
-    int j = 0;
+void bracket_adder() {
+    if(!bracket_flag){
 
-    if (expr[0]!='\0' && expr[0]=='-')
-    {
-        new_expr[j++] = '0';
-    } 
+        char new_expr[strlen(expr) * 2 + 1]; // Maximum length of new expression is twice the length of the original expression
+        int j = 0;
 
-    for (int i = 0; expr[i] != '\0'; i++) {
-        if (expr[i] == 's' || expr[i] == 'c' || expr[i] == 't' || expr[i] == 'l' || expr[i] == 'a') {
-            new_expr[j++] = '(';
-            while(expr[i] != ')') {
-                if (expr[i] == '(' && expr[i+1] == '-'){
-                    new_expr[j++] = '(';
-                    new_expr[j++] = '0';
-                    i++;
-                }
-                new_expr[j++] = expr[i++];
-            }
-            new_expr[j++] = expr[i];
-            new_expr[j++] = ')';
-
-        } else if (expr[i] == '(' && expr[i+1] == '-') { // Replace (- with (0-
-            new_expr[j++] = '(';
+        if (expr[0]!='\0' && expr[0]=='-')
+        {
             new_expr[j++] = '0';
-            new_expr[j++] = '-';
-            i++;
-        } else {
-            new_expr[j++] = expr[i];
+        } 
+
+        for (int i = 0; expr[i] != '\0'; i++) {
+            if (expr[i] == 's' || expr[i] == 'c' || expr[i] == 't' || expr[i] == 'l' || expr[i] == 'a') {
+                new_expr[j++] = '(';
+                while(expr[i] != ')') {
+                    if (expr[i] == '(' && expr[i+1] == '-'){
+                        new_expr[j++] = '(';
+                        new_expr[j++] = '0';
+                        i++;
+                    }
+                    new_expr[j++] = expr[i++];
+                }
+                new_expr[j++] = expr[i];
+                new_expr[j++] = ')';
+
+            } else if (expr[i] == '(' && expr[i+1] == '-') { // Replace (- with (0-
+                new_expr[j++] = '(';
+                new_expr[j++] = '0';
+                new_expr[j++] = '-';
+                i++;
+            } else {
+                new_expr[j++] = expr[i];
+            }
         }
+        new_expr[j] = '\0';
+        strcpy(expr, new_expr);
+        bracket_flag = 1;
     }
-    new_expr[j] = '\0';
-    return new_expr;
 }
 
 // Generate x values
-double* x_vals(int n, int min, int max) {
-    double* x = malloc(n * sizeof(double));
-    double step_size = ((double)max - (double)min) / ((double)n - 1);
+void x_vals() {
+    double step_size = ((double)X_MAX - (double)X_MIN) / ((double)N - 1);
 
-    for (int i = 0; i < n; i++) {
-        x[i] = min + i * step_size;
+    for (int i = 0; i < N; i++) {
+        xy[0][i] = X_MIN + i * step_size;
     }
-    return x;
 }
 
 // Replace variable with value and replace pi and e
-char* val_replacer(char* expr, double val) {
-    char* new_expr = malloc(strlen(expr) * 2 + 100);
+void val_replacer(double val) {
+    char new_expr[EXP_LEN];
     int j = 0;
 
     for (int i = 0; expr[i] != '\0'; i++) {
         if (expr[i] == 'x') {   // Replace x with value with (0val)
             new_expr[j++] = '(';
             new_expr[j++] = '0';
-            char* num = malloc(20);
+            char num[50];
             sprintf(num, "%f", val);
             for (int k = 0; num[k] != '\0'; k++) {
                 new_expr[j++] = num[k];
             }
-            free(num);
             new_expr[j++] = ')';
         } else if (expr[i] == 'p' && expr[i + 1] == 'i'){
             new_expr[j++] = '3';
@@ -298,78 +319,55 @@ char* val_replacer(char* expr, double val) {
         }
     }
     new_expr[j] = '\0';
-    return new_expr;
+    strcpy(expr_val, new_expr);
 }
 
 // Generate y values corresponding to x values
-double* y_vals(int n, double* x, char* expr) {
-    double* y = malloc(n * sizeof(double));
-    char* corrected_expr = bracket_adder(expr);
-    for (int i = 0; i < n; i++) {
-        char* new_expr = val_replacer(corrected_expr, x[i]);
-        y[i] = eval(new_expr);
-        free(new_expr);
+void y_vals() {
+    bracket_adder();
+    for (int i = 0; i < N; i++) {
+        val_replacer(xy[0][i]);
+        xy[1][i] = eval(expr_val);
     }
-    return y;
 }
 
-// Generate x and y values
-double** xy_vals(int n, int min, int max, char* expr) {
-    double** xy = malloc(2 * sizeof(double*));
-    xy[0] = x_vals(n, min, max);
-    xy[1] = y_vals(n, xy[0], expr);
-    return xy;
+void xy_vals() {
+    x_vals();
+    y_vals();
 }
 
 //---------------ADDITIONAL OPERATIONS ON X AND Y VALUES----------------
 
 // Calculate the derivative of a function
-double ** derivative(int n, double** xy) {
-    double** dy_dx = malloc(2 * sizeof(double*));
-    dy_dx[0] = malloc(n * sizeof(double));
-    dy_dx[1] = malloc(n * sizeof(double));
-
-    for (int i = 0; i < n - 1; i++) {
-        dy_dx[0][i] = xy[0][i];
+void derivative() {
+    for (int i = 0; i < N - 1; i++) {
+        dy_dx[0][i] = (xy[0][i + 1] + xy[0][i]) / 2;
         dy_dx[1][i] = (xy[1][i + 1] - xy[1][i]) / (xy[0][i + 1] - xy[0][i]);
     }
-    dy_dx[0][n - 1] = xy[0][n - 1];
-    dy_dx[1][n - 1] = dy_dx[1][n - 2];
-
-    return dy_dx;
+    
 }
 
 // Calculate the integral of a function
-double ** integral(int n, double** xy) {
-    double** integral = malloc(2 * sizeof(double*));
-    integral[0] = malloc(n * sizeof(double));
-    integral[1] = malloc(n * sizeof(double));
+void integral() {
+    integral_xy[0][0] = xy[0][0];
+    integral_xy[1][0] = 0;
 
-    integral[0][0] = xy[0][0];
-    integral[1][0] = 0;
-
-    for (int i = 1; i < n; i++) {
-        integral[0][i] = xy[0][i];
-        integral[1][i] = integral[1][i - 1] + (xy[1][i] + xy[1][i - 1]) * (xy[0][i] - xy[0][i - 1]) / 2;
+    for (int i = 1; i < N-1; i++) {
+        integral_xy[0][i] = xy[0][i];
+        integral_xy[1][i] = integral_xy[1][i - 1] + (xy[1][i] + xy[1][i - 1]) * (xy[0][i] - xy[0][i - 1]) / 2;
     }
-
-    return integral;
 }
 
 // Calculate the area under the curve of a function
-double area_under_curve(int n, double** xy) {
-    double area = 0;
-    for (int i = 1; i < n; i++) {
+void area_under_curve() {
+    area = 0;
+    for (int i = 1; i < N; i++) {
         area += (xy[1][i] + xy[1][i - 1]) * (xy[0][i] - xy[0][i - 1]) / 2;
     }
-    return area;
 }
 
 // Calculate the bisection points of a function
-double ** bisection_points(int n, double** xy) {
-    double** bisection = malloc(2 * sizeof(double*));
-    bisection[0] = malloc(MAX_ZEROS * 2 * sizeof(double));
-    bisection[1] = malloc(MAX_ZEROS * 2 * sizeof(double));
+void bisection_points() {
     int j=0;
 
     //populate bisection points with NAN
@@ -378,7 +376,7 @@ double ** bisection_points(int n, double** xy) {
         bisection[1][i] = NAN;
     }
 
-    for (int i = 0; i < n - 1; i++) {
+    for (int i = 0; i < N - 1; i++) {
         double x1 = xy[0][i];
         double x2 = xy[0][i + 1];
         double y1 = xy[1][i];
@@ -398,18 +396,16 @@ double ** bisection_points(int n, double** xy) {
         printf("%f %f\n", bisection[0][i], bisection[1][i]);
         printf("%f %f\n", bisection[0][i + 1], bisection[1][i + 1]);
     }
-
-    return bisection;
 }
 
 // Calculate the root using the bisection method with given points
 // returns NAN if the points do not have opposite signs or the root is not found
-double bisection_method(double point1[1][2], double point2[1][2], char* expr) {
+double bisection_method(double point1[1][2], double point2[1][2]) {
     double x1 = point1[0][0];
     double x2 = point2[0][0];
     double y1 = point1[0][1];
     double y2 = point2[0][1];
-    char* corrected_expr = bracket_adder(expr);
+    bracket_adder(expr);
 
     if (y1 * y2 >= 0) {
         printf("The points do not have opposite signs\n");
@@ -417,7 +413,8 @@ double bisection_method(double point1[1][2], double point2[1][2], char* expr) {
     }
 
     double x_mid = (x1 + x2) / 2;
-    double y_mid = eval(val_replacer(corrected_expr, x_mid));
+    val_replacer(x_mid);
+    double y_mid = eval(expr_val);
 
     for (int i = 0; i < MAX_ITERATIONS; i++) {
         if (y_mid == 0 || (x2 - x1) / 2 < EPSILON) {
@@ -433,7 +430,8 @@ double bisection_method(double point1[1][2], double point2[1][2], char* expr) {
         }
 
         x_mid = (x1 + x2) / 2;
-        y_mid = eval(val_replacer(corrected_expr, x_mid));
+        val_replacer(x_mid);
+        y_mid = eval(expr_val);
     }
 
     printf("Root not found\n");
@@ -441,34 +439,22 @@ double bisection_method(double point1[1][2], double point2[1][2], char* expr) {
 }
 
 // Calculate the zeros of a function
-Stack zeros_of_function(int n, double** xy, char* expr) {
-    Stack zeros;
-    init(&zeros);
-
+void zeros_of_function() {
     // Find bisection points
-    double** bisection = bisection_points(n, xy);
+    bisection_points();
 
     // Find zeros
     for (int i = 0; i < MAX_ZEROS * 2; i += 2) {
         if(!isnan(bisection[0][i])){
             double point1[1][2] = {{bisection[0][i], bisection[1][i]}};
             double point2[1][2] = {{bisection[0][i + 1], bisection[1][i + 1]}};
-            double zero = bisection_method(point1, point2, expr);
+            double zero = bisection_method(point1, point2);
             if (!isnan(zero)) {
                 push(&zeros, zero);
             }
         }
     }
-
-    printf("+++Zeros of the function\n");
-    print_stack(&zeros);
-    free(bisection[0]);
-    free(bisection[1]);
-
-    return zeros;
 }
-
-
 
 //---------------MAPPING OF X AND Y VALUES TO SCREEN COORDINATES----------------
 
@@ -511,24 +497,18 @@ double min(double* arr, int n) {
 // Map x and y values to screen coordinates
 // (x1, y1), (x2, y2) are the screen coordinates - corners of the screen in pixcels
 // (x_min, x_max) are the minimum and maximum values of x
-double** map_xy(int n, double** xy, int x1, int y1,  int x2, int y2, double x_min, double x_max) {
-    double** mapped_xy = malloc(2 * sizeof(double*));
-    mapped_xy[0] = malloc(n * sizeof(double));
-    mapped_xy[1] = malloc(n * sizeof(double));
-
-    double y_min = min(xy[1], n);
-    double y_max = max(xy[1], n);
-    double x_range = x_max - x_min;
+void map_xy(int x1, int y1,  int x2, int y2) {
+    double y_min = min(xy[1], N);
+    double y_max = max(xy[1], N);
+    double x_range = X_MAX - X_MIN;
     double y_range = y_max - y_min;
     double x_scale = (x2 - x1) / x_range;
     double y_scale = (y2 - y1) / y_range;
-    double x_offset = x1 - x_scale * x_min;
+    double x_offset = x1 - x_scale * X_MIN;
     double y_offset = y1 - y_scale * y_min;
 
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < N; i++) {
         mapped_xy[0][i] = x_scale * xy[0][i] + x_offset;
         mapped_xy[1][i] = y_scale * xy[1][i] + y_offset;
     }
-
-    return mapped_xy;
 }

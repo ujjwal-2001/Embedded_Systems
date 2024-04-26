@@ -12,7 +12,7 @@ with open(filename1, mode='r') as file:
         y_values1.append(y)
 
 # Plot the points
-plt.scatter(x_values1, y_values1, color='blue')
+plt.plot(x_values1, y_values1, color='blue')
 plt.xlabel('X')
 plt.ylabel('Y')
 plt.title('2D Points')
@@ -31,7 +31,7 @@ with open(filename1, mode='r') as file:
         y_values.append(y)
 
 # Plot the points
-plt.scatter(x_values, y_values, color='blue')
+plt.plot(x_values, y_values, color='blue')
 plt.xlabel('X')
 plt.ylabel('Y')
 plt.title('2D Points mapped')
@@ -51,7 +51,7 @@ with open(filename1, mode='r') as file:
         y_values.append(y)
 
 # Plot the points
-plt.scatter(x_values, y_values, color='blue')
+plt.plot(x_values, y_values, color='blue')
 plt.xlabel('X')
 plt.ylabel('Y')
 plt.title('Derivative')
@@ -71,7 +71,7 @@ with open(filename1, mode='r') as file:
         y_values.append(y)
 
 # Plot the points
-plt.scatter(x_values, y_values, color='blue')
+plt.plot(x_values, y_values, color='blue')
 plt.xlabel('X')
 plt.ylabel('Y')
 plt.title('Integral')

@@ -4,8 +4,8 @@
 #define MAX_STACK_SIZE 100      // maximum size of the mathematical expression
 #define PI 3.14159265           // value of pi  
 #define E 2.718281828459045     // value of e
-#define EPSILON 0.000001          // value of epsilon
-#define MAX_ITERATIONS 50       // maximum number of iterations for bisection method
+#define EPSILON 0.000001        // value of epsilon
+#define MAX_ITERATIONS 70       // maximum number of iterations for bisection method
 #define MAX_ZEROS 10            // maximum number of zeros of a function
 
 #include "evaluate.h"
@@ -30,10 +30,10 @@ double eval(const char* expr);                      // Evaluate expression
 
 // GENERATION OF X AND Y VALUES
 char* bracket_adder(char* expr);                        // Envolopes sin, cos, tan, log, and abs in brackets
-double* x_vals(int n, int min, int max);                // Generate x values
+double* x_vals(int n, double min, double max);                // Generate x values
 char* val_replacer(char* expr, double val);             // Replace variable with value
 double* y_vals(int n, double* x, char* expr);           // Generate y values corresponding to x values
-double ** xy_vals(int n, int min, int max, char* expr); // Generate x and y values
+double ** xy_vals(int n, double min, double  max, char* expr); // Generate x and y values
 
 // ADDITIONAL OPERATIONS ON X AND Y VALUES
 double ** derivative(int n, double** xy);                   // Calculate the derivative of a function

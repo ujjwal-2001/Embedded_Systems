@@ -7,11 +7,16 @@
 void save_to_txt(double** points, int num_points, const char *filename);
 
 int main() {
-    char expression[]= "(x-4)*(x+2)*x*(x-1)";
-    int min = -5;
-    int max = 5;
-    int n = 50;
+    char expression[]= "x";
+    double min = -10;
+    double max = 10;
+    int n = 500;
     double** xy = xy_vals(n, min, max, expression);
+    // Printing the x and y values
+    printf("x and y values\n");
+    for (int i = 0; i < n; i++) {
+        printf("%f %f\n", xy[0][i], xy[1][i]);
+    }
 
     double** xy_mapped = map_xy(n, xy, 0, 0, 100, 100, min, max);
 
@@ -56,9 +61,9 @@ void save_to_txt(double** points, int num_points, const char *filename) {
     // Write the x and y values to the file
     for (int i = 0; i < num_points; i++) {
         // if number if inf or nan, skip
-        // if (isinf(points[0][i]) || isnan(points[0][i]) || isinf(points[1][i]) || isnan(points[1][i])) {
-        //     continue;
-        // }
+        if (isinf(points[0][i]) || isnan(points[0][i]) || isinf(points[1][i]) || isnan(points[1][i])) {
+            continue;
+        }
         fprintf(file, "%f %f\n", points[0][i], points[1][i]);
     }
 
