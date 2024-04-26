@@ -9,31 +9,33 @@ void save_to_txt2(double points[2][N-1], const char *filename);
 
 int main() {
     initialize();
-    strcpy(expr, "sin(x+2) + log(x)");
+    strcpy(__EXPR__, "sin(x+2) + log(x)");
+    __X_MIN__ = -10;
+    __X_MAX__ = 10;
     xy_vals();
     // Printing the x and y values
     printf("x and y values\n");
     for (int i = 0; i < N; i++) {
-        printf("%f %f\n", xy[0][i], xy[1][i]);
+        printf("%f %f\n", __XY__[0][i], __XY__[1][i]);
     }
 
-    //Calculation of zeros
-    zeros_of_function();
-    printf("Zeros of the function\n");
-    print_stack(&zeros);
+    //Calculation of __ZEROS__
+    // zeros_of_function();
+    // printf("Zeros of the function\n");
+    // print_stack(&__ZEROS__);
 
     derivative();
     integral();
     area_under_curve();
     map_xy(0, 0, 800, 600);
 
-    save_to_txt1(xy,  "points.txt ");
+    save_to_txt1(__XY__,  "points.txt ");
     printf("Data saved to %s\n", "points.txt ");
-    save_to_txt1(mapped_xy,  "points_mapped.txt");
+    save_to_txt1(__MAPPED_XY__,  "points_mapped.txt");
     printf("Data saved to %s\n", "points_mapped.txt ");
-    save_to_txt2(dy_dx,  "derivative.txt");
+    save_to_txt2(__DY_DX__,  "derivative.txt");
     printf("Data saved to %s\n", "derivative.txt ");
-    save_to_txt2(integral_xy,  "integral.txt");
+    save_to_txt2(__INTEGRAL_XY__,  "integral.txt");
     printf("Data saved to %s\n", "integral.txt ");
     
     return 0;

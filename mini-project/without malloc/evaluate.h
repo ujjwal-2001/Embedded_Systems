@@ -10,8 +10,6 @@
 #define MAX_ITERATIONS 70       // maximum number of iterations for bisection method
 #define MAX_ZEROS 10            // maximum number of zeros of a function
 #define N 500                   // maximum number of points
-#define X_MIN -15               // minimum x value
-#define X_MAX 15                // maximum x value
 #define EXP_LEN 150             // maximum length of the expression
 
 #include "evaluate.h"
@@ -23,16 +21,18 @@ typedef struct {
 } Stack;
 
 // GLOBAL VARIABLES
-extern char expr[EXP_LEN];                  // expression to be evaluated (x)
-extern char expr_val[EXP_LEN];              // expression to be evaluated (number)
-extern int bracket_flag;                    // flag to check if brackets are added
-extern double xy[2][N];                     // x values
-extern double mapped_xy[2][N];              // x values mapped to screen coordinates
-extern double dy_dx[2][N-1];                // derivative values
-extern double integral_xy[2][N-1];            // integral values
-extern double area;                         // area under the curve
-extern double bisection[MAX_ZEROS][2];      // bisection points
-extern Stack zeros;                         // zeros of the function
+extern char __EXPR__[EXP_LEN];                  // expression to be evaluated (x)
+extern char __EXPR_VAL__[EXP_LEN];              // expression to be evaluated (number)
+extern int __BRACKET_FLAG__;                    // flag to check if brackets are added
+extern double __X_MIN__;                      // minimum x value
+extern double __X_MAX__;                      // maximum x value
+extern double __XY__[2][N];                     // x values
+extern double __MAPPED_XY__[2][N];              // x values mapped to screen coordinates
+extern double __DY_DX__[2][N-1];                // derivative values
+extern double __INTEGRAL_XY__[2][N-1];            // integral values
+extern double __AREA__;                         // __AREA__ under the curve
+extern double __BISECTION__[MAX_ZEROS][2];      // bisection points
+extern Stack __ZEROS__;                         // zeros of the function
 
 // INITIALIZATION
 void initialize();                                // Initialize global variables
@@ -58,7 +58,7 @@ void xy_vals();                     // Generate x and y values
 // ADDITIONAL OPERATIONS ON X AND Y VALUES
 void derivative();                   // Calculate the derivative of a function
 void integral();                     // Calculate the integral of a function
-void area_under_curve();                // Calculate the area under the curve of a function
+void area_under_curve();                // Calculate the __AREA__ under the curve of a function
 void bisection_points();             // Calculate the bisection points of a function
 double bisection_method(double point1[1][2], double point2[1][2]); // Calculate the root using the bisection method with given points  
 void zeros_of_function();                // Calculate the zeros of a function

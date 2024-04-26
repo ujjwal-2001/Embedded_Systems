@@ -6,23 +6,27 @@
 #include "evaluate.h"
 
 // GLOBAL VARIABLES
-char expr[EXP_LEN];                  // expression to be evaluated (x)
-char expr_val[EXP_LEN];              // expression to be evaluated (number)
-int bracket_flag;                    // flag to check if brackets are added
-double xy[2][N];                     // x values
-double mapped_xy[2][N];              // x values mapped to screen coordinates
-double dy_dx[2][N-1];                // derivative values
-double integral_xy[2][N-1];            // integral values
-double area;                         // area under the curve
-double bisection[MAX_ZEROS][2];      // bisection points
-Stack zeros;                         // zeros of the function
+char __EXPR__[EXP_LEN];                  // expression to be evaluated (x)
+char __EXPR_VAL__[EXP_LEN];              // expression to be evaluated (number)
+int __BRACKET_FLAG__;                    // flag to check if brackets are added
+double __X_MIN__;                      // minimum x value
+double __X_MAX__;                      // maximum x value
+double __XY__[2][N];                     // x values
+double __MAPPED_XY__[2][N];              // x values mapped to screen coordinates
+double __DY_DX__[2][N-1];                // derivative values
+double __INTEGRAL_XY__[2][N-1];            // integral values
+double __AREA__;                         // __AREA__ under the curve
+double __BISECTION__[MAX_ZEROS][2];      // bisection points
+Stack __ZEROS__;                         // zeros of the function
 
 // INITIALIZATION
 void initialize() {
-    strcpy(expr, "");
-    bracket_flag = 0;
-    init(&zeros);
-    area = 0;
+    strcpy(__EXPR__, "");
+    __BRACKET_FLAG__ = 0;
+    init(&__ZEROS__);
+    __AREA__ = 0;
+    __X_MAX__ = 0;
+    __X_MIN__ = 0;
 }
 
 //---------------EVALUATION OF MATHEMATICAL EXPRESSIONS----------------
@@ -95,7 +99,12 @@ double applyOp(double a, double b, char op) {
         case '+': return a + b;
         case '-': return a - b;
         case '*': return a * b;
-        case '/': return a / b;
+        case '/': {
+            if (b == 0) {
+                return NAN;
+            }
+            return a / b;
+        }
         case '^': return pow(a, b);
         default: return 0;
     }
@@ -226,51 +235,51 @@ double eval(const char* expr) {
 // Example input: "2*sin(3.14)+log(100)"
 // Example output: "2*(sin(3.14))+(log(100))"
 void bracket_adder() {
-    if(!bracket_flag){
+    if(!__BRACKET_FLAG__){
 
-        char new_expr[strlen(expr) * 2 + 1]; // Maximum length of new expression is twice the length of the original expression
+        char new_expr[strlen(__EXPR__) * 2 + 1]; // Maximum length of new expression is twice the length of the original expression
         int j = 0;
 
-        if (expr[0]!='\0' && expr[0]=='-')
+        if (__EXPR__[0]!='\0' && __EXPR__[0]=='-')
         {
             new_expr[j++] = '0';
         } 
 
-        for (int i = 0; expr[i] != '\0'; i++) {
-            if (expr[i] == 's' || expr[i] == 'c' || expr[i] == 't' || expr[i] == 'l' || expr[i] == 'a') {
+        for (int i = 0; __EXPR__[i] != '\0'; i++) {
+            if (__EXPR__[i] == 's' || __EXPR__[i] == 'c' || __EXPR__[i] == 't' || __EXPR__[i] == 'l' || __EXPR__[i] == 'a') {
                 new_expr[j++] = '(';
-                while(expr[i] != ')') {
-                    if (expr[i] == '(' && expr[i+1] == '-'){
+                while(__EXPR__[i] != ')') {
+                    if (__EXPR__[i] == '(' && __EXPR__[i+1] == '-'){
                         new_expr[j++] = '(';
                         new_expr[j++] = '0';
                         i++;
                     }
-                    new_expr[j++] = expr[i++];
+                    new_expr[j++] = __EXPR__[i++];
                 }
-                new_expr[j++] = expr[i];
+                new_expr[j++] = __EXPR__[i];
                 new_expr[j++] = ')';
 
-            } else if (expr[i] == '(' && expr[i+1] == '-') { // Replace (- with (0-
+            } else if (__EXPR__[i] == '(' && __EXPR__[i+1] == '-') { // Replace (- with (0-
                 new_expr[j++] = '(';
                 new_expr[j++] = '0';
                 new_expr[j++] = '-';
                 i++;
             } else {
-                new_expr[j++] = expr[i];
+                new_expr[j++] = __EXPR__[i];
             }
         }
         new_expr[j] = '\0';
-        strcpy(expr, new_expr);
-        bracket_flag = 1;
+        strcpy(__EXPR__, new_expr);
+        __BRACKET_FLAG__ = 1;
     }
 }
 
 // Generate x values
 void x_vals() {
-    double step_size = ((double)X_MAX - (double)X_MIN) / ((double)N - 1);
+    double step_size = ((double)__X_MAX__ - (double)__X_MIN__) / ((double)N - 1);
 
     for (int i = 0; i < N; i++) {
-        xy[0][i] = X_MIN + i * step_size;
+        __XY__[0][i] = __X_MIN__ + i * step_size;
     }
 }
 
@@ -279,8 +288,8 @@ void val_replacer(double val) {
     char new_expr[EXP_LEN];
     int j = 0;
 
-    for (int i = 0; expr[i] != '\0'; i++) {
-        if (expr[i] == 'x') {   // Replace x with value with (0val)
+    for (int i = 0; __EXPR__[i] != '\0'; i++) {
+        if (__EXPR__[i] == 'x') {   // Replace x with value with (0val)
             new_expr[j++] = '(';
             new_expr[j++] = '0';
             char num[50];
@@ -289,7 +298,7 @@ void val_replacer(double val) {
                 new_expr[j++] = num[k];
             }
             new_expr[j++] = ')';
-        } else if (expr[i] == 'p' && expr[i + 1] == 'i'){
+        } else if (__EXPR__[i] == 'p' && __EXPR__[i + 1] == 'i'){
             new_expr[j++] = '3';
             new_expr[j++] = '.';
             new_expr[j++] = '1';
@@ -300,7 +309,7 @@ void val_replacer(double val) {
             new_expr[j++] = '2';
             new_expr[j++] = '6';
             new_expr[j++] = '5';
-        } else if (expr[i] == 'e') {
+        } else if (__EXPR__[i] == 'e') {
             new_expr[j++] = '2';
             new_expr[j++] = '.';
             new_expr[j++] = '7';
@@ -315,19 +324,19 @@ void val_replacer(double val) {
             new_expr[j++] = '4';
             new_expr[j++] = '5';
         } else {
-            new_expr[j++] = expr[i];
+            new_expr[j++] = __EXPR__[i];
         }
     }
     new_expr[j] = '\0';
-    strcpy(expr_val, new_expr);
+    strcpy(__EXPR_VAL__, new_expr);
 }
 
 // Generate y values corresponding to x values
 void y_vals() {
     bracket_adder();
     for (int i = 0; i < N; i++) {
-        val_replacer(xy[0][i]);
-        xy[1][i] = eval(expr_val);
+        val_replacer(__XY__[0][i]);
+        __XY__[1][i] = eval(__EXPR_VAL__);
     }
 }
 
@@ -341,28 +350,28 @@ void xy_vals() {
 // Calculate the derivative of a function
 void derivative() {
     for (int i = 0; i < N - 1; i++) {
-        dy_dx[0][i] = (xy[0][i + 1] + xy[0][i]) / 2;
-        dy_dx[1][i] = (xy[1][i + 1] - xy[1][i]) / (xy[0][i + 1] - xy[0][i]);
+        __DY_DX__[0][i] = (__XY__[0][i + 1] + __XY__[0][i]) / 2;
+        __DY_DX__[1][i] = (__XY__[1][i + 1] - __XY__[1][i]) / (__XY__[0][i + 1] - __XY__[0][i]);
     }
     
 }
 
 // Calculate the integral of a function
 void integral() {
-    integral_xy[0][0] = xy[0][0];
-    integral_xy[1][0] = 0;
+    __INTEGRAL_XY__[0][0] = __XY__[0][0];
+    __INTEGRAL_XY__[1][0] = 0;
 
     for (int i = 1; i < N-1; i++) {
-        integral_xy[0][i] = xy[0][i];
-        integral_xy[1][i] = integral_xy[1][i - 1] + (xy[1][i] + xy[1][i - 1]) * (xy[0][i] - xy[0][i - 1]) / 2;
+        __INTEGRAL_XY__[0][i] = __XY__[0][i];
+        __INTEGRAL_XY__[1][i] = __INTEGRAL_XY__[1][i - 1] + (__XY__[1][i] + __XY__[1][i - 1]) * (__XY__[0][i] - __XY__[0][i - 1]) / 2;
     }
 }
 
-// Calculate the area under the curve of a function
+// Calculate the __AREA__ under the curve of a function
 void area_under_curve() {
-    area = 0;
+    __AREA__ = 0;
     for (int i = 1; i < N; i++) {
-        area += (xy[1][i] + xy[1][i - 1]) * (xy[0][i] - xy[0][i - 1]) / 2;
+        __AREA__ += (__XY__[1][i] + __XY__[1][i - 1]) * (__XY__[0][i] - __XY__[0][i - 1]) / 2;
     }
 }
 
@@ -372,20 +381,20 @@ void bisection_points() {
 
     //populate bisection points with NAN
     for (int i = 0; i < MAX_ZEROS * 2; i++) {
-        bisection[0][i] = NAN;
-        bisection[1][i] = NAN;
+        __BISECTION__[0][i] = NAN;
+        __BISECTION__[1][i] = NAN;
     }
 
     for (int i = 0; i < N - 1; i++) {
-        double x1 = xy[0][i];
-        double x2 = xy[0][i + 1];
-        double y1 = xy[1][i];
-        double y2 = xy[1][i + 1];
+        double x1 = __XY__[0][i];
+        double x2 = __XY__[0][i + 1];
+        double y1 = __XY__[1][i];
+        double y2 = __XY__[1][i + 1];
         if (y1 * y2 < 0) {
-            bisection[0][j] = x1;
-            bisection[1][j] = y1;
-            bisection[0][j + 1] = x2;
-            bisection[1][j + 1] = y2;
+            __BISECTION__[0][j] = x1;
+            __BISECTION__[1][j] = y1;
+            __BISECTION__[0][j + 1] = x2;
+            __BISECTION__[1][j + 1] = y2;
             j += 2;
         }
     }
@@ -393,8 +402,8 @@ void bisection_points() {
     // printing all the values
     printf("+++Bisection points\nx     y\n");
     for (int i = 0; i < MAX_ZEROS * 2; i += 2) {
-        printf("%f %f\n", bisection[0][i], bisection[1][i]);
-        printf("%f %f\n", bisection[0][i + 1], bisection[1][i + 1]);
+        printf("%f %f\n", __BISECTION__[0][i], __BISECTION__[1][i]);
+        printf("%f %f\n", __BISECTION__[0][i + 1], __BISECTION__[1][i + 1]);
     }
 }
 
@@ -405,7 +414,7 @@ double bisection_method(double point1[1][2], double point2[1][2]) {
     double x2 = point2[0][0];
     double y1 = point1[0][1];
     double y2 = point2[0][1];
-    bracket_adder(expr);
+    bracket_adder(__EXPR__);
 
     if (y1 * y2 >= 0) {
         printf("The points do not have opposite signs\n");
@@ -414,7 +423,7 @@ double bisection_method(double point1[1][2], double point2[1][2]) {
 
     double x_mid = (x1 + x2) / 2;
     val_replacer(x_mid);
-    double y_mid = eval(expr_val);
+    double y_mid = eval(__EXPR_VAL__);
 
     for (int i = 0; i < MAX_ITERATIONS; i++) {
         if (y_mid == 0 || (x2 - x1) / 2 < EPSILON) {
@@ -431,7 +440,7 @@ double bisection_method(double point1[1][2], double point2[1][2]) {
 
         x_mid = (x1 + x2) / 2;
         val_replacer(x_mid);
-        y_mid = eval(expr_val);
+        y_mid = eval(__EXPR_VAL__);
     }
 
     printf("Root not found\n");
@@ -445,12 +454,12 @@ void zeros_of_function() {
 
     // Find zeros
     for (int i = 0; i < MAX_ZEROS * 2; i += 2) {
-        if(!isnan(bisection[0][i])){
-            double point1[1][2] = {{bisection[0][i], bisection[1][i]}};
-            double point2[1][2] = {{bisection[0][i + 1], bisection[1][i + 1]}};
+        if(!isnan(__BISECTION__[0][i])){
+            double point1[1][2] = {{__BISECTION__[0][i], __BISECTION__[1][i]}};
+            double point2[1][2] = {{__BISECTION__[0][i + 1], __BISECTION__[1][i + 1]}};
             double zero = bisection_method(point1, point2);
             if (!isnan(zero)) {
-                push(&zeros, zero);
+                push(&__ZEROS__, zero);
             }
         }
     }
@@ -496,19 +505,19 @@ double min(double* arr, int n) {
 
 // Map x and y values to screen coordinates
 // (x1, y1), (x2, y2) are the screen coordinates - corners of the screen in pixcels
-// (x_min, x_max) are the minimum and maximum values of x
+// (x_min, __X_MAX__) are the minimum and maximum values of x
 void map_xy(int x1, int y1,  int x2, int y2) {
-    double y_min = min(xy[1], N);
-    double y_max = max(xy[1], N);
-    double x_range = X_MAX - X_MIN;
+    double y_min = min(__XY__[1], N);
+    double y_max = max(__XY__[1], N);
+    double x_range = __X_MAX__ - __X_MIN__;
     double y_range = y_max - y_min;
     double x_scale = (x2 - x1) / x_range;
     double y_scale = (y2 - y1) / y_range;
-    double x_offset = x1 - x_scale * X_MIN;
+    double x_offset = x1 - x_scale * __X_MIN__;
     double y_offset = y1 - y_scale * y_min;
 
     for (int i = 0; i < N; i++) {
-        mapped_xy[0][i] = x_scale * xy[0][i] + x_offset;
-        mapped_xy[1][i] = y_scale * xy[1][i] + y_offset;
+        __MAPPED_XY__[0][i] = x_scale * __XY__[0][i] + x_offset;
+        __MAPPED_XY__[1][i] = y_scale * __XY__[1][i] + y_offset;
     }
 }
