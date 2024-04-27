@@ -46,7 +46,7 @@ extern double __MAPPED_DY_DX__[2][N-1];         // mapped derivative values     
 extern double __INTEGRAL_XY__[2][N-1];          // integral values                      - USER SHOULD CAN USE THIS
 extern double __MAPPED_INTEGRAL_XY__[2][N-1];   // mapped integral values               - USER SHOULD CAN USE THIS
 extern double __AREA__;                         // __AREA__ under the curve             - USER SHOULD CAN USE THIS
-extern double __BISECTION__[MAX_ZEROS][2];      // bisection points                     - USER SHOULD CAN USE THIS
+extern double __BISECTION__[2][MAX_ZEROS*2];      // bisection points                     - USER SHOULD CAN USE THIS
 extern Stack __ZEROS__;                         // zeros of the function                - USER SHOULD CAN USE THIS
 
 // INITIALIZATION

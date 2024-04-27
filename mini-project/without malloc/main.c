@@ -9,7 +9,7 @@ void save_to_txt2(double points[2][N-1], const char *filename);
 
 int main() {
     initialize();                       // step 1: initialize the global variables
-    strcpy(__EXPR__, "(x-5)*(x+5)*(x)");    // step 2: change the expression
+    strcpy(__EXPR__, "sin(x) + log(x)");    // step 2: change the expression
     __X_MIN__ = -10;                    // step 3: change the minimum x value
     __X_MAX__ = 10;                     // step 4: change the maximum x value
     xy_vals();                          // step 5: generate x and y values
@@ -22,6 +22,8 @@ int main() {
     map_dx_dy();                        // step 9: map the derivative values
     integral();                         // step 10: calculate the integral of a function
     map_integral();                     // step 11: map the integral values
+    area_under_curve();                 // step 12: calculate the area under the curve of a function
+    zeros_of_function();                // step 13: calculate the zeros of a function
 
     // Printing the x and y values
     printf("x and y values\n");
@@ -29,11 +31,22 @@ int main() {
         printf("%f %f\n", __XY__[0][i], __XY__[1][i]);
     }
 
-    //Calculation of __ZEROS__
-    // zeros_of_function();
-    // printf("Zeros of the function\n");
-    // print_stack(&__ZEROS__);
+    // printing Y amx and y min for various graphs
+    printf("Y min and Y max\n");
+    printf("Y min: %f\n", __Y_MIN__);
+    printf("Y max: %f\n", __Y_MAX__);
+    printf("Y min dy/dx: %f\n", __Y_MIN_DY_DX__);
+    printf("Y max dy/dx: %f\n", __Y_MAX_DY_DX__);
+    printf("Y min integral: %f\n", __Y_MIN_INTEGRAL__);
+    printf("Y max integral: %f\n", __Y_MAX_INTEGRAL__);
+
+    // Printing Zeros of the function
+    printf("Zeros of the function\n");
+    print_stack(&__ZEROS__);
     
+    // Printing the area under the curve
+    printf("Area under the curve: %f\n", __AREA__);
+
     save_to_txt1(__XY__,  "points.txt ");
     printf("Data saved to %s\n", "points.txt ");
     save_to_txt1(__MAPPED_XY__,  "points_mapped.txt");

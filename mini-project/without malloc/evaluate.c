@@ -28,7 +28,7 @@ double __MAPPED_DY_DX__[2][N-1];         // derivative values
 double __INTEGRAL_XY__[2][N-1];          // integral values
 double __MAPPED_INTEGRAL_XY__[2][N-1];   // integral values
 double __AREA__;                         // __AREA__ under the curve
-double __BISECTION__[MAX_ZEROS][2];      // bisection points
+double __BISECTION__[2][MAX_ZEROS*2];      // bisection points
 Stack __ZEROS__;                         // zeros of the function
 
 // INITIALIZATION
@@ -419,8 +419,13 @@ void integral() {
 // Calculate the __AREA__ under the curve of a function
 void area_under_curve() {
     __AREA__ = 0;
-    for (int i = 1; i < N; i++) {
-        __AREA__ += (__XY__[1][i] + __XY__[1][i - 1]) * (__XY__[0][i] - __XY__[0][i - 1]) / 2;
+    double last_valid_value = 0;
+    for(int i=0; i<N-1; i++){
+        if (isinf(__XY__[1][i]) || isnan(__XY__[1][i]) || isinf(__XY__[1][i+1]) || isnan(__XY__[1][i+1])) {
+            continue;
+        }
+        __AREA__ = last_valid_value + (__XY__[1][i] + __XY__[1][i + 1]) * (__XY__[0][i + 1] - __XY__[0][i]) / 2;
+        last_valid_value = __AREA__;
     }
 }
 
@@ -429,7 +434,7 @@ void bisection_points() {
     int j=0;
 
     //populate bisection points with NAN
-    for (int i = 0; i < MAX_ZEROS * 2; i++) {
+    for (int i = 0; i < MAX_ZEROS*2; i++) {
         __BISECTION__[0][i] = NAN;
         __BISECTION__[1][i] = NAN;
     }
@@ -501,9 +506,12 @@ void zeros_of_function() {
     // Find bisection points
     bisection_points();
 
+    // Clearing the Zeros
+    __ZEROS__.top = -1;
+
     // Find zeros
     for (int i = 0; i < MAX_ZEROS * 2; i += 2) {
-        if(!isnan(__BISECTION__[0][i])){
+        if(!isnan(__BISECTION__[0][i]) && !isnan(__BISECTION__[1][i]) && !isnan(__BISECTION__[0][i + 1]) && !isnan(__BISECTION__[1][i + 1])){
             double point1[1][2] = {{__BISECTION__[0][i], __BISECTION__[1][i]}};
             double point2[1][2] = {{__BISECTION__[0][i + 1], __BISECTION__[1][i + 1]}};
             double zero = bisection_method(point1, point2);
