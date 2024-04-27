@@ -49,6 +49,8 @@ void initialize() {
     __MP_Y1__ = 0;
     __MP_X2__ = 0;
     __MP_Y2__ = 0;
+    __ZOOMING__ = ZOOM_FACTOR;
+    __SHIFTING__ = SHIFT_FACTOR;
     for (int i = 0; i < N; i++) {
         __XY__[0][i] = 0;
         __XY__[1][i] = 0;
@@ -468,7 +470,7 @@ double bisection_method(double point1[1][2], double point2[1][2]) {
     double x2 = point2[0][0];
     double y1 = point1[0][1];
     double y2 = point2[0][1];
-    bracket_adder(__EXPR__);
+    bracket_adder();
 
     if (y1 * y2 >= 0) {
         printf("The points do not have opposite signs\n");
@@ -577,6 +579,7 @@ void map_xy() {
     }
 }
 
+// Map dy/dx values to screen coordinates
 void map_dx_dy() {
     double x_range = __X_MAX__ - __X_MIN__;
     double y_range = __Y_MAX_DY_DX__ - __Y_MIN_DY_DX__;
@@ -591,6 +594,7 @@ void map_dx_dy() {
     }
 }
 
+// Map integral y values to screen coordinates
 void map_integral() {
     double x_range = __X_MAX__ - __X_MIN__;
     double y_range = __Y_MAX_INTEGRAL__ - __Y_MIN_INTEGRAL__;
@@ -603,4 +607,58 @@ void map_integral() {
         __MAPPED_INTEGRAL_XY__[0][i] = x_scale * __INTEGRAL_XY__[0][i] + x_offset;
         __MAPPED_INTEGRAL_XY__[1][i] = y_scale * __INTEGRAL_XY__[1][i] + y_offset;
     }
+}
+
+// ---------------FUNCTIONS TO ZOOM AND SHIFT----------------
+
+// zoom in the curve
+void zoom_in() {
+    __X_MIN__ /= __ZOOMING__;
+    __X_MAX__ /= __ZOOMING__;
+    __ZOOMING__ /= ZOOM_FACTOR;
+    __SHIFTING__ *= SHIFT_FACTOR*__ZOOMING__;
+    xy_vals();
+    map_xy();
+    derivative();
+    map_dx_dy();
+    integral();
+    map_integral();
+}
+
+// zoom out the curve
+void zoom_out() {
+    __X_MIN__ *= __ZOOMING__;
+    __X_MAX__ *= __ZOOMING__;
+    __ZOOMING__ *= ZOOM_FACTOR;
+    __SHIFTING__ *= SHIFT_FACTOR*__ZOOMING__;
+    xy_vals();
+    map_xy();
+    derivative();
+    map_dx_dy();
+    integral();
+    map_integral();
+}
+
+// shift the curve to the right
+void shift_right() {
+    __X_MIN__ += __SHIFTING__;
+    __X_MAX__ += __SHIFTING__;
+    xy_vals();
+    map_xy();
+    derivative();
+    map_dx_dy();
+    integral();
+    map_integral();
+}
+
+// shift the curve to the left
+void shift_left() {
+    __X_MIN__ -= __SHIFTING__;
+    __X_MAX__ -= __SHIFTING__;
+    xy_vals();
+    map_xy();
+    derivative();
+    map_dx_dy();
+    integral();
+    map_integral();
 }

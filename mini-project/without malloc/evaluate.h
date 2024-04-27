@@ -11,6 +11,8 @@
 #define MAX_ZEROS 10            // maximum number of zeros of a function - Property of Zeros of a function
 #define N 800                   // maximum number of points
 #define EXP_LEN 150             // maximum length of the expression
+#define ZOOM_FACTOR 1.25        // zoom factor | should be more than one 
+#define SHIFT_FACTOR 1          // shift factor
 
 #include "evaluate.h"
 
@@ -39,6 +41,8 @@ extern double __MP_X1__;                        // x1 value for mapping         
 extern double __MP_Y1__;                        // y1 value for mapping                 - USER SHOULD CHANGE THIS
 extern double __MP_X2__;                        // x2 value for mapping                 - USER SHOULD CHANGE THIS
 extern double __MP_Y2__;                        // y2 value for mapping                 - USER SHOULD CHANGE THIS
+extern double __ZOOMING__;                      // zooming factor                       - USER SHOULD NOT CHANGE THIS
+extern double __SHIFTING__;                     // shifting factor                      - USER SHOULD NOT CHANGE THiS
 extern double __XY__[2][N];                     // x values                             - USER SHOULD CAN USE THIS
 extern double __MAPPED_XY__[2][N];              // x values mapped to screen coordinates- USER SHOULD USE THIS
 extern double __DY_DX__[2][N-1];                // derivative values                    - USER SHOULD CAN USE THIS
@@ -83,6 +87,12 @@ double max(double* arr, int n);     // Find maximum value in an array
 double min(double* arr, int n);     // Find minimum value in an array
 void map_xy();                      // Map x and y values to screen coordinates
 void map_dx_dy();                   // Map dy/dx values to screen coordinates
-void map_integral();             // Map integral y values to screen coordinates
+void map_integral();                // Map integral y values to screen coordinates
+
+// FUNCTION TO ZOOM AND SHIFT THE GRAPH
+void zoom_in();                     // Zoom in the graph
+void zoom_out();                    // Zoom out the graph
+void shift_left();                  // Shift the graph to the left
+void shift_right();                 // Shift the graph to the right
 
 #endif
