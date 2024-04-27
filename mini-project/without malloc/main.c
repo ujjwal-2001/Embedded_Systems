@@ -8,11 +8,12 @@ void save_to_txt1(double points[2][N], const char *filename);
 void save_to_txt2(double points[2][N-1], const char *filename);
 
 int main() {
-    initialize();
-    strcpy(__EXPR__, "log(sin(x))");
-    __X_MIN__ = -10;
-    __X_MAX__ = 10;
-    xy_vals();
+    initialize();                       // step 1: initialize the global variables
+    strcpy(__EXPR__, "log(sin(x))");    // step 2: change the expression
+    __X_MIN__ = -10;                    // step 3: change the minimum x value
+    __X_MAX__ = 10;                     // step 4: change the maximum x value
+    xy_vals();                          // step 5: generate x and y values
+    map_xy(0, 0, 800, 600);             // step 6: map x and y values to screen coordinates
     // Printing the x and y values
     printf("x and y values\n");
     for (int i = 0; i < N; i++) {
@@ -27,7 +28,7 @@ int main() {
     derivative();
     integral();
     area_under_curve();
-    map_xy(0, 0, 800, 600);
+    
 
     save_to_txt1(__XY__,  "points.txt ");
     printf("Data saved to %s\n", "points.txt ");
