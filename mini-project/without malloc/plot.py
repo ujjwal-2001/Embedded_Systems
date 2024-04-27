@@ -58,6 +58,26 @@ plt.title('Derivative')
 plt.grid(True)
 plt.show()
 
+#Ploting derivative mapped
+filename1 = 'map_derivative.txt'
+x_values = []
+y_values = []
+
+# Read the data from the text file
+with open(filename1, mode='r') as file:
+    for line in file:
+        x, y = map(float, line.split())
+        x_values.append(x)
+        y_values.append(y)
+
+# Plot the points
+plt.plot(x_values, y_values, color='blue')
+plt.xlabel('X')
+plt.ylabel('Y')
+plt.title('Mapped Derivative')
+plt.grid(True)
+plt.show()
+
 #Ploting integral
 filename1 = 'integral.txt'
 x_values = []
@@ -75,5 +95,25 @@ plt.plot(x_values, y_values, color='blue')
 plt.xlabel('X')
 plt.ylabel('Y')
 plt.title('Integral')
+plt.grid(True)
+plt.show()
+
+#Ploting integral mapped
+filename1 = 'map_integral.txt'
+x_values = []
+y_values = []
+
+# Read the data from the text file
+with open(filename1, mode='r') as file:
+    for line in file:
+        x, y = map(float, line.split())
+        x_values.append(x)
+        y_values.append(y)
+
+# Plot the points
+plt.plot(x_values, y_values, color='blue')
+plt.xlabel('X')
+plt.ylabel('Y')
+plt.title('Map Integral')
 plt.grid(True)
 plt.show()

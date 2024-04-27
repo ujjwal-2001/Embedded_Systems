@@ -9,11 +9,20 @@ void save_to_txt2(double points[2][N-1], const char *filename);
 
 int main() {
     initialize();                       // step 1: initialize the global variables
-    strcpy(__EXPR__, "log(sin(x))");    // step 2: change the expression
+    strcpy(__EXPR__, "(x-5)*(x+5)*(x)");    // step 2: change the expression
     __X_MIN__ = -10;                    // step 3: change the minimum x value
     __X_MAX__ = 10;                     // step 4: change the maximum x value
     xy_vals();                          // step 5: generate x and y values
-    map_xy(0, 0, 800, 600);             // step 6: map x and y values to screen coordinates
+    __MP_X1__ = 0;                      // step 6.1: change the x1 value for mapping
+    __MP_Y1__ = 0;                      // step 6.2: change the y1 value for mapping
+    __MP_X2__ = 800;                    // step 6.3: change the x2 value for mapping
+    __MP_Y2__ = 600;                    // step 6.4: change the y2 value for mapping
+    map_xy();                           // step 7: map x and y values to screen coordinates
+    derivative();                       // step 8: calculate the derivative of a function
+    map_dx_dy();                        // step 9: map the derivative values
+    integral();                         // step 10: calculate the integral of a function
+    map_integral();                     // step 11: map the integral values
+
     // Printing the x and y values
     printf("x and y values\n");
     for (int i = 0; i < N; i++) {
@@ -24,20 +33,19 @@ int main() {
     // zeros_of_function();
     // printf("Zeros of the function\n");
     // print_stack(&__ZEROS__);
-
-    derivative();
-    integral();
-    area_under_curve();
     
-
     save_to_txt1(__XY__,  "points.txt ");
     printf("Data saved to %s\n", "points.txt ");
     save_to_txt1(__MAPPED_XY__,  "points_mapped.txt");
     printf("Data saved to %s\n", "points_mapped.txt ");
     save_to_txt2(__DY_DX__,  "derivative.txt");
     printf("Data saved to %s\n", "derivative.txt ");
+    save_to_txt2(__MAPPED_DY_DX__,  "map_derivative.txt");
+    printf("Data saved to %s\n", "map_derivative.txt ");
     save_to_txt2(__INTEGRAL_XY__,  "integral.txt");
     printf("Data saved to %s\n", "integral.txt ");
+    save_to_txt2(__MAPPED_INTEGRAL_XY__,  "map_integral.txt");
+    printf("Data saved to %s\n", "map_integral.txt ");
     
     return 0;
 }

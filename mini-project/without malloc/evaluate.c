@@ -9,12 +9,24 @@
 char __EXPR__[EXP_LEN];                  // expression to be evaluated (x)
 char __EXPR_VAL__[EXP_LEN];              // expression to be evaluated (number)
 int __BRACKET_FLAG__;                    // flag to check if brackets are added
-double __X_MIN__;                      // minimum x value
-double __X_MAX__;                      // maximum x value
+double __X_MIN__;                        // minimum x value
+double __X_MAX__;                        // maximum x value
+double __Y_MIN__;                        // minimum y value                      
+double __Y_MAX__;                        // maximum y value                      
+double __Y_MIN_DY_DX__;                  // minimum y value of dy/dx             
+double __Y_MAX_DY_DX__;                  // maximum y value of dy/dx             
+double __Y_MIN_INTEGRAL__;               // minimum y value of integral of y     
+double __Y_MAX_INTEGRAL__;               // maximum y value of integral of y  
+double __MP_X1__;                        // x1 value for mapping
+double __MP_Y1__;                        // y1 value for mapping
+double __MP_X2__;                        // x2 value for mapping
+double __MP_Y2__;                        // y2 value for mapping  
 double __XY__[2][N];                     // x values
 double __MAPPED_XY__[2][N];              // x values mapped to screen coordinates
 double __DY_DX__[2][N-1];                // derivative values
-double __INTEGRAL_XY__[2][N-1];            // integral values
+double __MAPPED_DY_DX__[2][N-1];         // derivative values
+double __INTEGRAL_XY__[2][N-1];          // integral values
+double __MAPPED_INTEGRAL_XY__[2][N-1];   // integral values
 double __AREA__;                         // __AREA__ under the curve
 double __BISECTION__[MAX_ZEROS][2];      // bisection points
 Stack __ZEROS__;                         // zeros of the function
@@ -27,6 +39,32 @@ void initialize() {
     __AREA__ = 0;
     __X_MAX__ = 0;
     __X_MIN__ = 0;
+    __Y_MAX__ = 0;
+    __Y_MIN__ = 0;
+    __Y_MAX_DY_DX__ = 0;
+    __Y_MIN_DY_DX__ = 0;
+    __Y_MAX_INTEGRAL__ = 0;
+    __Y_MIN_INTEGRAL__ = 0;
+    __MP_X1__ = 0;
+    __MP_Y1__ = 0;
+    __MP_X2__ = 0;
+    __MP_Y2__ = 0;
+    for (int i = 0; i < N; i++) {
+        __XY__[0][i] = 0;
+        __XY__[1][i] = 0;
+        __MAPPED_XY__[0][i] = 0;
+        __MAPPED_XY__[1][i] = 0;
+    }
+    for (int i = 0; i < N - 1; i++) {
+        __DY_DX__[0][i] = 0;
+        __DY_DX__[1][i] = 0;
+        __MAPPED_DY_DX__[0][i] = 0;
+        __MAPPED_DY_DX__[1][i] = 0;
+        __INTEGRAL_XY__[0][i] = 0;
+        __INTEGRAL_XY__[1][i] = 0;
+        __MAPPED_INTEGRAL_XY__[0][i] = 0;
+        __MAPPED_INTEGRAL_XY__[1][i] = 0;
+    }
 }
 
 //---------------EVALUATION OF MATHEMATICAL EXPRESSIONS----------------
@@ -338,6 +376,8 @@ void y_vals() {
         val_replacer(__XY__[0][i]);
         __XY__[1][i] = eval(__EXPR_VAL__);
     }
+    __Y_MIN__ = min(__XY__[1], N);
+    __Y_MAX__ = max(__XY__[1], N);
 }
 
 void xy_vals() {
@@ -353,7 +393,8 @@ void derivative() {
         __DY_DX__[0][i] = (__XY__[0][i + 1] + __XY__[0][i]) / 2;
         __DY_DX__[1][i] = (__XY__[1][i + 1] - __XY__[1][i]) / (__XY__[0][i + 1] - __XY__[0][i]);
     }
-    
+    __Y_MIN_DY_DX__ = min(__DY_DX__[1], N - 1);
+    __Y_MAX_DY_DX__ = max(__DY_DX__[1], N - 1);
 }
 
 // Calculate the integral of a function
@@ -371,6 +412,8 @@ void integral() {
         __INTEGRAL_XY__[1][i] = last_valid_value + (__XY__[1][i] + __XY__[1][i + 1]) * (__XY__[0][i + 1] - __XY__[0][i]) / 2;
         last_valid_value = __INTEGRAL_XY__[1][i];
     }
+    __Y_MIN_INTEGRAL__ = min(__INTEGRAL_XY__[1], N - 1);
+    __Y_MAX_INTEGRAL__ = max(__INTEGRAL_XY__[1], N - 1);
 }
 
 // Calculate the __AREA__ under the curve of a function
@@ -512,18 +555,44 @@ double min(double* arr, int n) {
 // Map x and y values to screen coordinates
 // (x1, y1), (x2, y2) are the screen coordinates - corners of the screen in pixcels
 // (x_min, __X_MAX__) are the minimum and maximum values of x
-void map_xy(int x1, int y1,  int x2, int y2) {
-    double y_min = min(__XY__[1], N);
-    double y_max = max(__XY__[1], N);
+void map_xy() {
     double x_range = __X_MAX__ - __X_MIN__;
-    double y_range = y_max - y_min;
-    double x_scale = (x2 - x1) / x_range;
-    double y_scale = (y2 - y1) / y_range;
-    double x_offset = x1 - x_scale * __X_MIN__;
-    double y_offset = y1 - y_scale * y_min;
+    double y_range = __Y_MAX__ - __Y_MIN__;
+    double x_scale = (__MP_X2__-__MP_X1__) / x_range;
+    double y_scale = (__MP_Y2__-__MP_Y1__) / y_range;
+    double x_offset = __MP_X1__ - x_scale * __X_MIN__;
+    double y_offset = __MP_Y1__ - y_scale * __Y_MIN__;
 
     for (int i = 0; i < N; i++) {
         __MAPPED_XY__[0][i] = x_scale * __XY__[0][i] + x_offset;
         __MAPPED_XY__[1][i] = y_scale * __XY__[1][i] + y_offset;
+    }
+}
+
+void map_dx_dy() {
+    double x_range = __X_MAX__ - __X_MIN__;
+    double y_range = __Y_MAX_DY_DX__ - __Y_MIN_DY_DX__;
+    double x_scale = (__MP_X2__-__MP_X1__) / x_range;
+    double y_scale = (__MP_Y2__-__MP_Y1__) / y_range;
+    double x_offset = __MP_X1__ - x_scale * __X_MIN__;
+    double y_offset = __MP_Y1__ - y_scale * __Y_MIN_DY_DX__;
+
+    for (int i = 0; i < N - 1; i++) {
+        __MAPPED_DY_DX__[0][i] = x_scale * __DY_DX__[0][i] + x_offset;
+        __MAPPED_DY_DX__[1][i] = y_scale * __DY_DX__[1][i] + y_offset;
+    }
+}
+
+void map_integral() {
+    double x_range = __X_MAX__ - __X_MIN__;
+    double y_range = __Y_MAX_INTEGRAL__ - __Y_MIN_INTEGRAL__;
+    double x_scale = (__MP_X2__-__MP_X1__) / x_range;
+    double y_scale = (__MP_Y2__-__MP_Y1__) / y_range;
+    double x_offset = __MP_X1__ - x_scale * __X_MIN__;
+    double y_offset = __MP_Y1__ - y_scale * __Y_MIN_INTEGRAL__;
+
+    for (int i = 0; i < N - 1; i++) {
+        __MAPPED_INTEGRAL_XY__[0][i] = x_scale * __INTEGRAL_XY__[0][i] + x_offset;
+        __MAPPED_INTEGRAL_XY__[1][i] = y_scale * __INTEGRAL_XY__[1][i] + y_offset;
     }
 }

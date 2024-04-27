@@ -22,17 +22,29 @@ typedef struct {
 
 // GLOBAL VARIABLES
 // USER CAN USE THIS: READ ONLY !!!!
-// USER SHOULD CHANGE THIS: READ AND WRITE
+// USER SHOULD CHANGE THIS: WRITE
 // USER SHOULD NOT USE THIS: READ ONLY !!!!
 extern char __EXPR__[EXP_LEN];                  // expression to be evaluated (x)       - USER SHOULD CHANGE THIS
 extern char __EXPR_VAL__[EXP_LEN];              // expression to be evaluated (number)  - USER SHOULD NOT USE THIS
 extern int __BRACKET_FLAG__;                    // flag to check if brackets are added  - USER SHOULD NOT USE THIS
 extern double __X_MIN__;                        // minimum x value                      - USER SHOULD CHANGE THIS
 extern double __X_MAX__;                        // maximum x value                      - USER SHOULD CHANGE THIS
+extern double __Y_MIN__;                        // minimum y value                      - USER SHOULD USE THIS
+extern double __Y_MAX__;                        // maximum y value                      - USER SHOULD USE THIS
+extern double __Y_MIN_DY_DX__;                  // minimum y value of dy/dx             - USER SHOULD USE THIS
+extern double __Y_MAX_DY_DX__;                  // maximum y value of dy/dx             - USER SHOULD USE THIS
+extern double __Y_MIN_INTEGRAL__;               // minimum y value of integral of y     - USER SHOULD USE THIS
+extern double __Y_MAX_INTEGRAL__;               // maximum y value of integral of y     - USER SHOULD USE THIS
+extern double __MP_X1__;                        // x1 value for mapping                 - USER SHOULD CHANGE THIS
+extern double __MP_Y1__;                        // y1 value for mapping                 - USER SHOULD CHANGE THIS
+extern double __MP_X2__;                        // x2 value for mapping                 - USER SHOULD CHANGE THIS
+extern double __MP_Y2__;                        // y2 value for mapping                 - USER SHOULD CHANGE THIS
 extern double __XY__[2][N];                     // x values                             - USER SHOULD CAN USE THIS
 extern double __MAPPED_XY__[2][N];              // x values mapped to screen coordinates- USER SHOULD USE THIS
 extern double __DY_DX__[2][N-1];                // derivative values                    - USER SHOULD CAN USE THIS
+extern double __MAPPED_DY_DX__[2][N-1];         // mapped derivative values             - USER SHOULD CAN USE THIS
 extern double __INTEGRAL_XY__[2][N-1];          // integral values                      - USER SHOULD CAN USE THIS
+extern double __MAPPED_INTEGRAL_XY__[2][N-1];   // mapped integral values               - USER SHOULD CAN USE THIS
 extern double __AREA__;                         // __AREA__ under the curve             - USER SHOULD CAN USE THIS
 extern double __BISECTION__[MAX_ZEROS][2];      // bisection points                     - USER SHOULD CAN USE THIS
 extern Stack __ZEROS__;                         // zeros of the function                - USER SHOULD CAN USE THIS
@@ -67,8 +79,10 @@ double bisection_method(double point1[1][2], double point2[1][2]); // Calculate 
 void zeros_of_function();                // Calculate the zeros of a function
 
 // MAPPING OF X AND Y VALUES TO SCREEN COORDINATES
-double max(double* arr, int n); // Find maximum value in an array
-double min(double* arr, int n); // Find minimum value in an array
-void map_xy(int x1, int y1,  int x2, int y2); // Map x and y values to screen coordinates
+double max(double* arr, int n);     // Find maximum value in an array
+double min(double* arr, int n);     // Find minimum value in an array
+void map_xy();                      // Map x and y values to screen coordinates
+void map_dx_dy();                   // Map dy/dx values to screen coordinates
+void map_integral();             // Map integral y values to screen coordinates
 
 #endif
