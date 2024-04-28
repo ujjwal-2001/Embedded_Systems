@@ -615,7 +615,7 @@ void map_integral() {
 void zoom_in() {
     __X_MIN__ /= __ZOOMING__;
     __X_MAX__ /= __ZOOMING__;
-    __ZOOMING__ /= ZOOM_FACTOR;
+    __ZOOMING__ *= ZOOM_FACTOR;
     __SHIFTING__ *= SHIFT_FACTOR*__ZOOMING__;
     xy_vals();
     map_xy();
