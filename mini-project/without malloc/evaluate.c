@@ -613,9 +613,9 @@ void map_integral() {
 
 // zoom in the curve
 void zoom_in() {
+    __ZOOMING__ = (__ZOOMING__/ZOOM_FACTOR <= 1) ? ZOOM_FACTOR : __ZOOMING__/ZOOM_FACTOR;
     __X_MIN__ /= __ZOOMING__;
     __X_MAX__ /= __ZOOMING__;
-    __ZOOMING__ = (__ZOOMING__/ZOOM_FACTOR < ZOOM_FACTOR) ? ZOOM_FACTOR : __ZOOMING__/ZOOM_FACTOR;
     __SHIFTING__ *= SHIFT_FACTOR*__ZOOMING__;
     xy_vals();
     map_xy();
@@ -627,9 +627,9 @@ void zoom_in() {
 
 // zoom out the curve
 void zoom_out() {
+    __ZOOMING__ *= ZOOM_FACTOR;
     __X_MIN__ *= __ZOOMING__;
     __X_MAX__ *= __ZOOMING__;
-    __ZOOMING__ *= ZOOM_FACTOR;
     __SHIFTING__ *= SHIFT_FACTOR*__ZOOMING__;
     xy_vals();
     map_xy();
