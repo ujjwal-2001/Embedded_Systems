@@ -9,7 +9,7 @@ void save_to_txt2(double points[2][N-1], const char *filename);
 
 int main() {
     initialize();                       // step 1: initialize the global variables
-    strcpy(__EXPR__, "sin(x)");    // step 2: change the expression
+    strcpy(__EXPR__, "(x^2)-2");    // step 2: change the expression
     __X_MIN__ = -10;                    // step 3: change the minimum x value
     __X_MAX__ = 10;                     // step 4: change the maximum x value
     xy_vals();                          // step 5: generate x and y values
@@ -24,12 +24,13 @@ int main() {
     map_integral();                     // step 11: map the integral values
     area_under_curve();                 // step 12: calculate the area under the curve of a function
     zeros_of_function();                // step 13: calculate the zeros of a function
+    map_zeros();                        // step 14: map the zeros of a function
 
     // Printing the x and y values
-    printf("x and y values\n");
-    for (int i = 0; i < N; i++) {
-        printf("%f %f\n", __XY__[0][i], __XY__[1][i]);
-    }
+    // printf("x and y values\n");
+    // for (int i = 0; i < N; i++) {
+    //     printf("%f %f\n", __XY__[0][i], __XY__[1][i]);
+    // }
 
     // printing Y amx and y min for various graphs
     printf("Y min and Y max\n");
@@ -43,6 +44,10 @@ int main() {
     // Printing Zeros of the function
     printf("Zeros of the function\n");
     print_stack(&__ZEROS__);
+
+    // Printing mapped zeros of the function
+    printf("Mapped zeros of the function\n");
+    print_stack(&__MAPPED_ZEROS__);
     
     // Printing the area under the curve
     printf("Area under the curve: %f\n", __AREA__);

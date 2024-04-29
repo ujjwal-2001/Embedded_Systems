@@ -32,12 +32,14 @@ double __MAPPED_INTEGRAL_XY__[2][N-1];   // integral values
 double __AREA__;                         // __AREA__ under the curve
 double __BISECTION__[2][MAX_ZEROS*2];      // bisection points
 Stack __ZEROS__;                         // zeros of the function
+Stack __MAPPED_ZEROS__;                         // zeros of the function
 
 // INITIALIZATION
 void initialize() {
     strcpy(__EXPR__, "");
     __BRACKET_FLAG__ = 0;
     init(&__ZEROS__);
+    init(&__MAPPED_ZEROS__ );
     __AREA__ = 0;
     __X_MAX__ = 0;
     __X_MIN__ = 0;
@@ -456,13 +458,6 @@ void bisection_points() {
             j += 2;
         }
     }
-
-    // printing all the values
-    printf("+++Bisection points\nx     y\n");
-    for (int i = 0; i < MAX_ZEROS * 2; i += 2) {
-        printf("%f %f\n", __BISECTION__[0][i], __BISECTION__[1][i]);
-        printf("%f %f\n", __BISECTION__[0][i + 1], __BISECTION__[1][i + 1]);
-    }
 }
 
 // Calculate the root using the bisection method with given points
@@ -618,8 +613,7 @@ void map_zeros() {
     double x_offset = __MP_X1__ - x_scale * __X_MIN__;
 
     for (int i = 0; i <= __ZEROS__.top; i++) {
-        double zero = pop(&__ZEROS__);
-        push(&__ZEROS__, zero);
+        double zero = __ZEROS__.items[i];
         double x = x_scale * zero + x_offset;
         push(&__MAPPED_ZEROS__, x);
     }
