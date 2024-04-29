@@ -9,28 +9,28 @@
 char __EXPR__[EXP_LEN];                  // expression to be evaluated (x)
 char __EXPR_VAL__[EXP_LEN];              // expression to be evaluated (number)
 int __BRACKET_FLAG__;                    // flag to check if brackets are added
-double __X_MIN__;                        // minimum x value
-double __X_MAX__;                        // maximum x value
-double __Y_MIN__;                        // minimum y value                      
-double __Y_MAX__;                        // maximum y value                      
-double __Y_MIN_DY_DX__;                  // minimum y value of dy/dx             
-double __Y_MAX_DY_DX__;                  // maximum y value of dy/dx             
-double __Y_MIN_INTEGRAL__;               // minimum y value of integral of y     
-double __Y_MAX_INTEGRAL__;               // maximum y value of integral of y  
-double __MP_X1__;                        // x1 value for mapping
-double __MP_Y1__;                        // y1 value for mapping
-double __MP_X2__;                        // x2 value for mapping
-double __MP_Y2__;                        // y2 value for mapping  
-double __ZOOMING__;                      // zooming factor 
-double __SHIFTING__;                     // shifting factor
-double __XY__[2][N];                     // x values
-double __MAPPED_XY__[2][N];              // x values mapped to screen coordinates
-double __DY_DX__[2][N-1];                // derivative values
-double __MAPPED_DY_DX__[2][N-1];         // derivative values
-double __INTEGRAL_XY__[2][N-1];          // integral values
-double __MAPPED_INTEGRAL_XY__[2][N-1];   // integral values
-double __AREA__;                         // __AREA__ under the curve
-double __BISECTION__[2][MAX_ZEROS*2];      // bisection points
+float __X_MIN__;                        // minimum x value
+float __X_MAX__;                        // maximum x value
+float __Y_MIN__;                        // minimum y value                      
+float __Y_MAX__;                        // maximum y value                      
+float __Y_MIN_DY_DX__;                  // minimum y value of dy/dx             
+float __Y_MAX_DY_DX__;                  // maximum y value of dy/dx             
+float __Y_MIN_INTEGRAL__;               // minimum y value of integral of y     
+float __Y_MAX_INTEGRAL__;               // maximum y value of integral of y  
+float __MP_X1__;                        // x1 value for mapping
+float __MP_Y1__;                        // y1 value for mapping
+float __MP_X2__;                        // x2 value for mapping
+float __MP_Y2__;                        // y2 value for mapping  
+float __ZOOMING__;                      // zooming factor 
+float __SHIFTING__;                     // shifting factor
+float __XY__[2][N];                     // x values
+float __MAPPED_XY__[2][N];              // x values mapped to screen coordinates
+float __DY_DX__[2][N-1];                // derivative values
+float __MAPPED_DY_DX__[2][N-1];         // derivative values
+float __INTEGRAL_XY__[2][N-1];          // integral values
+float __MAPPED_INTEGRAL_XY__[2][N-1];   // integral values
+float __AREA__;                         // __AREA__ under the curve
+float __BISECTION__[2][MAX_ZEROS*2];      // bisection points
 Stack __ZEROS__;                         // zeros of the function
 Stack __MAPPED_ZEROS__;                         // zeros of the function
 
@@ -81,7 +81,7 @@ void init(Stack* s) {
 }
 
 // Push item onto stack
-void push(Stack* s, double val) {
+void push(Stack* s, float val) {
     if (s->top == MAX_STACK_SIZE - 1) {
         printf("Stack Overflow\n");
         exit(EXIT_FAILURE);
@@ -90,17 +90,17 @@ void push(Stack* s, double val) {
 }
 
 // Pop item from stack
-double pop(Stack* s) {
+float pop(Stack* s) {
     if (s->top == -1) {
         printf("Stack Underflow\n");
         exit(EXIT_FAILURE);
     }
-    double val = s->items[(s->top)--];
+    float val = s->items[(s->top)--];
     return val;
 }
 
 // Peek at the top item of the stack
-double peek(Stack* s) {
+float peek(Stack* s) {
     if (s->top == -1) {
         printf("Stack Empty\n");
         exit(EXIT_FAILURE);
@@ -138,7 +138,7 @@ int precedence(char op) {
 }
 
 // Apply operator to operands
-double applyOp(double a, double b, char op) {
+float applyOp(float a, float b, char op) {
     switch (op) {
         case '+': return a + b;
         case '-': return a - b;
@@ -155,7 +155,7 @@ double applyOp(double a, double b, char op) {
 }
 
 // Evaluate the expression
-double eval(const char* expr) {
+float eval(const char* expr) {
     Stack valStack;
     Stack opStack;
     init(&valStack);
@@ -170,7 +170,7 @@ double eval(const char* expr) {
 
         if (isdigit(expr[i]) || (expr[i] == '.' && isdigit(expr[i + 1]))) {
             char* end;
-            double num = strtod(&expr[i], &end);
+            float num = strtod(&expr[i], &end);
             push(&valStack, num);
             i = end - expr;
             i--;
@@ -200,7 +200,7 @@ double eval(const char* expr) {
             push(&opStack, '(');
         } else if (expr[i] == ')') {
             while (peek(&opStack) != '(') {
-                double b = pop(&valStack);
+                float b = pop(&valStack);
                 char op = pop(&opStack);
                 if (op == 's') {
                     push(&valStack, sin(b));
@@ -216,14 +216,14 @@ double eval(const char* expr) {
                 } else if (op == 'm') {
                     push(&valStack, mod(b));
                 } else {
-                    double a = pop(&valStack);
+                    float a = pop(&valStack);
                     push(&valStack, applyOp(a, b, op));
                 }
             }
             pop(&opStack); // Remove '('
         } else {
             while (!isempty(&opStack) && precedence(expr[i]) <= precedence(peek(&opStack))) {
-                double b = pop(&valStack);
+                float b = pop(&valStack);
                 char op = pop(&opStack);
                 if (op == 's') {
                     push(&valStack, sin(b));
@@ -239,7 +239,7 @@ double eval(const char* expr) {
                 } else if (op == 'm') {
                     push(&valStack, mod(b));
                 } else {
-                    double a = pop(&valStack);
+                    float a = pop(&valStack);
                     push(&valStack, applyOp(a, b, op));
                 }
             }
@@ -249,7 +249,7 @@ double eval(const char* expr) {
     }
 
     while (!isempty(&opStack)) {
-        double b = pop(&valStack);
+        float b = pop(&valStack);
         char op = pop(&opStack);
         if (op == 's') {
             push(&valStack, sin(b));
@@ -265,7 +265,7 @@ double eval(const char* expr) {
         } else if (op == 'm') {
             push(&valStack, mod(b));
         } else{
-            double a = pop(&valStack);
+            float a = pop(&valStack);
             push(&valStack, applyOp(a, b, op));
         }
     }
@@ -320,7 +320,7 @@ void bracket_adder() {
 
 // Generate x values
 void x_vals() {
-    double step_size = ((double)__X_MAX__ - (double)__X_MIN__) / ((double)N - 1);
+    float step_size = ((float)__X_MAX__ - (float)__X_MIN__) / ((float)N - 1);
 
     for (int i = 0; i < N; i++) {
         __XY__[0][i] = __X_MIN__ + i * step_size;
@@ -328,7 +328,7 @@ void x_vals() {
 }
 
 // Replace variable with value and replace pi and e
-void val_replacer(double val) {
+void val_replacer(float val) {
     char new_expr[EXP_LEN];
     int j = 0;
 
@@ -353,6 +353,7 @@ void val_replacer(double val) {
             new_expr[j++] = '2';
             new_expr[j++] = '6';
             new_expr[j++] = '5';
+            i++;
         } else if (__EXPR__[i] == 'e') {
             new_expr[j++] = '2';
             new_expr[j++] = '.';
@@ -406,7 +407,7 @@ void derivative() {
 // Calculate the integral of a function
 void integral() {
 
-    double last_valid_value = 0;
+    float last_valid_value = 0;
 
     for(int i=0; i<N-1; i++){
         if (isinf(__XY__[1][i]) || isnan(__XY__[1][i]) || isinf(__XY__[1][i+1]) || isnan(__XY__[1][i+1])) {
@@ -425,7 +426,7 @@ void integral() {
 // Calculate the __AREA__ under the curve of a function
 void area_under_curve() {
     __AREA__ = 0;
-    double last_valid_value = 0;
+    float last_valid_value = 0;
     for(int i=0; i<N-1; i++){
         if (isinf(__XY__[1][i]) || isnan(__XY__[1][i]) || isinf(__XY__[1][i+1]) || isnan(__XY__[1][i+1])) {
             continue;
@@ -445,11 +446,11 @@ void bisection_points() {
         __BISECTION__[1][i] = NAN;
     }
 
-    for (int i = 0; i < N - 1; i++) {
-        double x1 = __XY__[0][i];
-        double x2 = __XY__[0][i + 1];
-        double y1 = __XY__[1][i];
-        double y2 = __XY__[1][i + 1];
+    for (int i = 0; (i < N - 1) && (j < MAX_ZEROS*2); i++) {
+        float x1 = __XY__[0][i];
+        float x2 = __XY__[0][i + 1];
+        float y1 = __XY__[1][i];
+        float y2 = __XY__[1][i + 1];
         if (y1 * y2 < 0) {
             __BISECTION__[0][j] = x1;
             __BISECTION__[1][j] = y1;
@@ -462,11 +463,11 @@ void bisection_points() {
 
 // Calculate the root using the bisection method with given points
 // returns NAN if the points do not have opposite signs or the root is not found
-double bisection_method(double point1[1][2], double point2[1][2]) {
-    double x1 = point1[0][0];
-    double x2 = point2[0][0];
-    double y1 = point1[0][1];
-    double y2 = point2[0][1];
+float bisection_method(float point1[1][2], float point2[1][2]) {
+    float x1 = point1[0][0];
+    float x2 = point2[0][0];
+    float y1 = point1[0][1];
+    float y2 = point2[0][1];
     bracket_adder();
 
     if (y1 * y2 >= 0) {
@@ -474,9 +475,9 @@ double bisection_method(double point1[1][2], double point2[1][2]) {
         return NAN;
     }
 
-    double x_mid = (x1 + x2) / 2;
+    float x_mid = (x1 + x2) / 2;
     val_replacer(x_mid);
-    double y_mid = eval(__EXPR_VAL__);
+    float y_mid = eval(__EXPR_VAL__);
 
     for (int i = 0; i < MAX_ITERATIONS; i++) {
         if (y_mid == 0 || (x2 - x1) / 2 < EPSILON) {
@@ -512,9 +513,9 @@ void zeros_of_function() {
     // Find zeros
     for (int i = 0; i < MAX_ZEROS * 2; i += 2) {
         if(!isnan(__BISECTION__[0][i]) && !isnan(__BISECTION__[1][i]) && !isnan(__BISECTION__[0][i + 1]) && !isnan(__BISECTION__[1][i + 1])){
-            double point1[1][2] = {{__BISECTION__[0][i], __BISECTION__[1][i]}};
-            double point2[1][2] = {{__BISECTION__[0][i + 1], __BISECTION__[1][i + 1]}};
-            double zero = bisection_method(point1, point2);
+            float point1[1][2] = {{__BISECTION__[0][i], __BISECTION__[1][i]}};
+            float point2[1][2] = {{__BISECTION__[0][i + 1], __BISECTION__[1][i + 1]}};
+            float zero = bisection_method(point1, point2);
             if (!isnan(zero)) {
                 push(&__ZEROS__, zero);
             }
@@ -524,11 +525,11 @@ void zeros_of_function() {
 
 //---------------MAPPING OF X AND Y VALUES TO SCREEN COORDINATES----------------
 
-// Find maximum value in an array of doubles ignoring NaN and Inf values
-double max(double* arr, int n) {
+// Find maximum value in an array of floats ignoring NaN and Inf values
+float max(float* arr, int n) {
     // initial value should not be NaN or Inf
     int i=0;
-    double max;
+    float max;
     while(isnan(arr[i]) || isinf(arr[i])) {
         i++;
     }
@@ -541,11 +542,11 @@ double max(double* arr, int n) {
     return max;
 }
 
-// Find minimum value in an array of doubles ignoring NaN and Inf values
-double min(double* arr, int n) {
+// Find minimum value in an array of floats ignoring NaN and Inf values
+float min(float* arr, int n) {
     // initial value should not be NaN or Inf
     int i=0;
-    double min;
+    float min;
     while(isnan(arr[i]) || isinf(arr[i])) {
         i++;
     }
@@ -564,12 +565,12 @@ double min(double* arr, int n) {
 // (x1, y1), (x2, y2) are the screen coordinates - corners of the screen in pixcels
 // (x_min, __X_MAX__) are the minimum and maximum values of x
 void map_xy() {
-    double x_range = __X_MAX__ - __X_MIN__;
-    double y_range = __Y_MAX__ - __Y_MIN__;
-    double x_scale = (__MP_X2__-__MP_X1__) / x_range;
-    double y_scale = (__MP_Y2__-__MP_Y1__) / y_range;
-    double x_offset = __MP_X1__ - x_scale * __X_MIN__;
-    double y_offset = __MP_Y1__ - y_scale * __Y_MIN__;
+    float x_range = __X_MAX__ - __X_MIN__;
+    float y_range = __Y_MAX__ - __Y_MIN__;
+    float x_scale = (__MP_X2__-__MP_X1__) / x_range;
+    float y_scale = (__MP_Y2__-__MP_Y1__) / y_range;
+    float x_offset = __MP_X1__ - x_scale * __X_MIN__;
+    float y_offset = __MP_Y1__ - y_scale * __Y_MIN__;
 
     for (int i = 0; i < N; i++) {
         __MAPPED_XY__[0][i] = x_scale * __XY__[0][i] + x_offset;
@@ -579,12 +580,12 @@ void map_xy() {
 
 // Map dy/dx values to screen coordinates
 void map_dx_dy() {
-    double x_range = __X_MAX__ - __X_MIN__;
-    double y_range = __Y_MAX_DY_DX__ - __Y_MIN_DY_DX__;
-    double x_scale = (__MP_X2__-__MP_X1__) / x_range;
-    double y_scale = (__MP_Y2__-__MP_Y1__) / y_range;
-    double x_offset = __MP_X1__ - x_scale * __X_MIN__;
-    double y_offset = __MP_Y1__ - y_scale * __Y_MIN_DY_DX__;
+    float x_range = __X_MAX__ - __X_MIN__;
+    float y_range = __Y_MAX_DY_DX__ - __Y_MIN_DY_DX__;
+    float x_scale = (__MP_X2__-__MP_X1__) / x_range;
+    float y_scale = (__MP_Y2__-__MP_Y1__) / y_range;
+    float x_offset = __MP_X1__ - x_scale * __X_MIN__;
+    float y_offset = __MP_Y1__ - y_scale * __Y_MIN_DY_DX__;
 
     for (int i = 0; i < N - 1; i++) {
         __MAPPED_DY_DX__[0][i] = x_scale * __DY_DX__[0][i] + x_offset;
@@ -594,12 +595,12 @@ void map_dx_dy() {
 
 // Map integral y values to screen coordinates
 void map_integral() {
-    double x_range = __X_MAX__ - __X_MIN__;
-    double y_range = __Y_MAX_INTEGRAL__ - __Y_MIN_INTEGRAL__;
-    double x_scale = (__MP_X2__-__MP_X1__) / x_range;
-    double y_scale = (__MP_Y2__-__MP_Y1__) / y_range;
-    double x_offset = __MP_X1__ - x_scale * __X_MIN__;
-    double y_offset = __MP_Y1__ - y_scale * __Y_MIN_INTEGRAL__;
+    float x_range = __X_MAX__ - __X_MIN__;
+    float y_range = __Y_MAX_INTEGRAL__ - __Y_MIN_INTEGRAL__;
+    float x_scale = (__MP_X2__-__MP_X1__) / x_range;
+    float y_scale = (__MP_Y2__-__MP_Y1__) / y_range;
+    float x_offset = __MP_X1__ - x_scale * __X_MIN__;
+    float y_offset = __MP_Y1__ - y_scale * __Y_MIN_INTEGRAL__;
 
     for (int i = 0; i < N - 1; i++) {
         __MAPPED_INTEGRAL_XY__[0][i] = x_scale * __INTEGRAL_XY__[0][i] + x_offset;
@@ -609,13 +610,13 @@ void map_integral() {
 
 // Map the zeros of the function to screen coordinates
 void map_zeros() {
-    double x_range = __X_MAX__ - __X_MIN__;
-    double x_scale = (__MP_X2__-__MP_X1__) / x_range;
-    double x_offset = __MP_X1__ - x_scale * __X_MIN__;
+    float x_range = __X_MAX__ - __X_MIN__;
+    float x_scale = (__MP_X2__-__MP_X1__) / x_range;
+    float x_offset = __MP_X1__ - x_scale * __X_MIN__;
 
     for (int i = 0; i <= __ZEROS__.top; i++) {
-        double zero = __ZEROS__.items[i];
-        double x = x_scale * zero + x_offset;
+        float zero = __ZEROS__.items[i];
+        float x = x_scale * zero + x_offset;
         push(&__MAPPED_ZEROS__, x);
     }
 }
