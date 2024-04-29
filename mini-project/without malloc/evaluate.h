@@ -3,16 +3,17 @@
 #ifndef EVALUATE_H
 #define EVALUATE_H
 
-#define MAX_STACK_SIZE 100      // maximum size of the mathematical expression in stack 
-#define PI 3.14159265           // value of pi  
-#define E 2.718281828459045     // value of e
-#define EPSILON 0.000001        // value of epsilon - Property of Zeros of a function
-#define MAX_ITERATIONS 70       // maximum number of iterations for bisection method - Property of Zeros of a function
-#define MAX_ZEROS 10            // maximum number of zeros of a function - Property of Zeros of a function
-#define N 800                   // maximum number of points
-#define EXP_LEN 150             // maximum length of the expression
-#define ZOOM_FACTOR 1.25        // zoom factor | should be more than one 
-#define SHIFT_FACTOR 1          // shift factor
+#define MAX_STACK_SIZE 100              // maximum size of the mathematical expression in stack 
+#define PI 3.14159265                   // value of pi  
+#define E 2.718281828459045             // value of e
+#define EPSILON 0.000001                // value of epsilon - Property of Zeros of a function
+#define MAX_ITERATIONS 70               // maximum number of iterations for bisection method - Property of Zeros of a function
+#define MAX_ZEROS 10                    // maximum number of zeros of a function - Property of Zeros of a function
+#define N 800                           // maximum number of points
+#define EXP_LEN 150                     // maximum length of the expression
+#define ZOOM_FACTOR 1.25                // zoom factor | should be more than one 
+#define SHIFT_FACTOR 1                  // shift factor
+#define mod(x) ((x) < 0 ? -(x) : (x))   // absolute value of x
 
 #include "evaluate.h"
 

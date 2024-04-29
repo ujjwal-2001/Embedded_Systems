@@ -188,9 +188,9 @@ double eval(const char* expr) {
             } else if (strncmp(&expr[i], "log", 3) == 0) {
                 i += 3;
                 push(&opStack, 'l');
-            } else if (strncmp(&expr[i], "abs", 3) == 0) {
+            } else if (strncmp(&expr[i], "mod", 3) == 0) {
                 i += 3;
-                push(&opStack, 'a');
+                push(&opStack, 'm');
             } else {
                 printf("Invalid function\n");
                 exit(EXIT_FAILURE);
@@ -213,8 +213,8 @@ double eval(const char* expr) {
                         return NAN;
                     }
                     push(&valStack, log(b));
-                } else if (op == 'a') {
-                    push(&valStack, abs(b));
+                } else if (op == 'm') {
+                    push(&valStack, mod(b));
                 } else {
                     double a = pop(&valStack);
                     push(&valStack, applyOp(a, b, op));
@@ -236,8 +236,8 @@ double eval(const char* expr) {
                         return NAN;
                     }
                     push(&valStack, log(b));
-                } else if (op == 'a') {
-                    push(&valStack, abs(b));
+                } else if (op == 'm') {
+                    push(&valStack, mod(b));
                 } else {
                     double a = pop(&valStack);
                     push(&valStack, applyOp(a, b, op));
@@ -262,8 +262,8 @@ double eval(const char* expr) {
                 return NAN;
             }
             push(&valStack, log(b));
-        } else if (op == 'a') {
-            push(&valStack, abs(b));
+        } else if (op == 'm') {
+            push(&valStack, mod(b));
         } else{
             double a = pop(&valStack);
             push(&valStack, applyOp(a, b, op));
@@ -290,7 +290,7 @@ void bracket_adder() {
         } 
 
         for (int i = 0; __EXPR__[i] != '\0'; i++) {
-            if (__EXPR__[i] == 's' || __EXPR__[i] == 'c' || __EXPR__[i] == 't' || __EXPR__[i] == 'l' || __EXPR__[i] == 'a') {
+            if (__EXPR__[i] == 's' || __EXPR__[i] == 'c' || __EXPR__[i] == 't' || __EXPR__[i] == 'l' || __EXPR__[i] == 'm') {
                 new_expr[j++] = '(';
                 while(__EXPR__[i] != ')') {
                     if (__EXPR__[i] == '(' && __EXPR__[i+1] == '-'){
