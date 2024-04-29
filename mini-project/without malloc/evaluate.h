@@ -11,7 +11,7 @@
 #define MAX_ZEROS 10                    // maximum number of zeros of a function - Property of Zeros of a function
 #define N 800                           // maximum number of points
 #define EXP_LEN 150                     // maximum length of the expression
-#define ZOOM_FACTOR 1.25                // zoom factor | should be more than one 
+#define ZOOM_FACTOR 2                   // zoom factor | should be more than one 
 #define SHIFT_FACTOR 1                  // shift factor
 #define mod(x) ((x) < 0 ? -(x) : (x))   // absolute value of x
 
@@ -42,8 +42,6 @@ extern float __MP_X1__;                        // x1 value for mapping          
 extern float __MP_Y1__;                        // y1 value for mapping                 - USER SHOULD CHANGE THIS
 extern float __MP_X2__;                        // x2 value for mapping                 - USER SHOULD CHANGE THIS
 extern float __MP_Y2__;                        // y2 value for mapping                 - USER SHOULD CHANGE THIS
-extern float __ZOOMING__;                      // zooming factor                       - USER SHOULD NOT CHANGE THIS
-extern float __SHIFTING__;                     // shifting factor                      - USER SHOULD NOT CHANGE THiS
 extern float __XY__[2][N];                     // x values                             - USER SHOULD CAN USE THIS
 extern float __MAPPED_XY__[2][N];              // x values mapped to screen coordinates- USER SHOULD USE THIS
 extern float __DY_DX__[2][N-1];                // derivative values                    - USER SHOULD CAN USE THIS

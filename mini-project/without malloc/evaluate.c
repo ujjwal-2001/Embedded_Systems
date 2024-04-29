@@ -21,8 +21,6 @@ float __MP_X1__;                        // x1 value for mapping
 float __MP_Y1__;                        // y1 value for mapping
 float __MP_X2__;                        // x2 value for mapping
 float __MP_Y2__;                        // y2 value for mapping  
-float __ZOOMING__;                      // zooming factor 
-float __SHIFTING__;                     // shifting factor
 float __XY__[2][N];                     // x values
 float __MAPPED_XY__[2][N];              // x values mapped to screen coordinates
 float __DY_DX__[2][N-1];                // derivative values
@@ -625,10 +623,8 @@ void map_zeros() {
 
 // zoom in the curve
 void zoom_in() {
-    __ZOOMING__ = (__ZOOMING__/ZOOM_FACTOR <= 1) ? ZOOM_FACTOR : __ZOOMING__/ZOOM_FACTOR;
-    __X_MIN__ /= __ZOOMING__;
-    __X_MAX__ /= __ZOOMING__;
-    __SHIFTING__ *= SHIFT_FACTOR*__ZOOMING__;
+    __X_MIN__ /= ZOOM_FACTOR;
+    __X_MAX__ /= ZOOM_FACTOR;
     xy_vals();
     map_xy();
     derivative();
@@ -639,10 +635,8 @@ void zoom_in() {
 
 // zoom out the curve
 void zoom_out() {
-    __ZOOMING__ *= ZOOM_FACTOR;
-    __X_MIN__ *= __ZOOMING__;
-    __X_MAX__ *= __ZOOMING__;
-    __SHIFTING__ *= SHIFT_FACTOR*__ZOOMING__;
+    __X_MIN__ *= ZOOM_FACTOR;
+    __X_MAX__ *= ZOOM_FACTOR;
     xy_vals();
     map_xy();
     derivative();
@@ -653,8 +647,9 @@ void zoom_out() {
 
 // shift the curve to the right
 void shift_right() {
-    __X_MIN__ += __SHIFTING__;
-    __X_MAX__ += __SHIFTING__;
+    float x_range = __X_MAX__ - __X_MIN__;
+    __X_MIN__ += x_range / SHIFT_FACTOR;
+    __X_MAX__ += x_range / SHIFT_FACTOR;
     xy_vals();
     map_xy();
     derivative();
@@ -665,8 +660,9 @@ void shift_right() {
 
 // shift the curve to the left
 void shift_left() {
-    __X_MIN__ -= __SHIFTING__;
-    __X_MAX__ -= __SHIFTING__;
+    float x_range = __X_MAX__ - __X_MIN__;
+    __X_MIN__ -= x_range / SHIFT_FACTOR;
+    __X_MAX__ -= x_range / SHIFT_FACTOR;
     xy_vals();
     map_xy();
     derivative();

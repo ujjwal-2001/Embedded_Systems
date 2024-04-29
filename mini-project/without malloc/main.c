@@ -17,28 +17,20 @@ int main() {
     __MP_Y1__ = 0;                      // step 6.2: change the y1 value for mapping
     __MP_X2__ = 800;                    // step 6.3: change the x2 value for mapping
     __MP_Y2__ = 600;                    // step 6.4: change the y2 value for mapping
-    printf("01\n")  ;
     map_xy();                           // step 7: map x and y values to screen coordinates
-    printf("02\n")  ;
     derivative();                       // step 8: calculate the derivative of a function
-    printf("03\n")  ;
     map_dx_dy();                        // step 9: map the derivative values
-    printf("04\n")  ;
     integral();                         // step 10: calculate the integral of a function
-    printf("05\n")  ;
     map_integral();                     // step 11: map the integral values
-    printf("06\n")  ;
     area_under_curve();                 // step 12: calculate the area under the curve of a function
-    printf("07\n")  ;
     zeros_of_function();                // step 13: calculate the zeros of a function
-    printf("08\n")  ;
     map_zeros();                        // step 14: map the zeros of a function
-    printf("09\n")  ;
-    //Printing the x and y values
-    printf("x and y values\n");
-    for (int i = 0; i < N; i++) {
-        printf("%f %f\n", __XY__[0][i], __XY__[1][i]);
-    }
+
+    // Printing the x and y values
+    // printf("x and y values\n");
+    // for (int i = 0; i < N; i++) {
+    //     printf("%f %f\n", __XY__[0][i], __XY__[1][i]);
+    // }
 
     // printing Y amx and y min for various graphs
     printf("Y min and Y max\n");
