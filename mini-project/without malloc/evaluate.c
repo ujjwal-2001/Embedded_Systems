@@ -21,6 +21,8 @@ double __MP_X1__;                        // x1 value for mapping
 double __MP_Y1__;                        // y1 value for mapping
 double __MP_X2__;                        // x2 value for mapping
 double __MP_Y2__;                        // y2 value for mapping  
+double __ZOOMING__;                      // zooming factor 
+double __SHIFTING__;                     // shifting factor
 double __XY__[2][N];                     // x values
 double __MAPPED_XY__[2][N];              // x values mapped to screen coordinates
 double __DY_DX__[2][N-1];                // derivative values
@@ -277,7 +279,7 @@ double eval(const char* expr) {
 void bracket_adder() {
     if(!__BRACKET_FLAG__){
 
-        char new_expr[strlen(__EXPR__) * 2 + 1]; // Maximum length of new expression is twice the length of the original expression
+        char new_expr[EXP_LEN]; // Maximum length of new expression is twice the length of the original expression
         int j = 0;
 
         if (__EXPR__[0]!='\0' && __EXPR__[0]=='-')
@@ -606,6 +608,20 @@ void map_integral() {
     for (int i = 0; i < N - 1; i++) {
         __MAPPED_INTEGRAL_XY__[0][i] = x_scale * __INTEGRAL_XY__[0][i] + x_offset;
         __MAPPED_INTEGRAL_XY__[1][i] = y_scale * __INTEGRAL_XY__[1][i] + y_offset;
+    }
+}
+
+// Map the zeros of the function to screen coordinates
+void map_zeros() {
+    double x_range = __X_MAX__ - __X_MIN__;
+    double x_scale = (__MP_X2__-__MP_X1__) / x_range;
+    double x_offset = __MP_X1__ - x_scale * __X_MIN__;
+
+    for (int i = 0; i <= __ZEROS__.top; i++) {
+        double zero = pop(&__ZEROS__);
+        push(&__ZEROS__, zero);
+        double x = x_scale * zero + x_offset;
+        push(&__MAPPED_ZEROS__, x);
     }
 }
 
