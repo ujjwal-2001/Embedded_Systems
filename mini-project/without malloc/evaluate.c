@@ -507,6 +507,7 @@ void zeros_of_function() {
 
     // Clearing the Zeros
     __ZEROS__.top = -1;
+    __MAPPED_ZEROS__.top = -1;
 
     // Find zeros
     for (int i = 0; i < MAX_ZEROS * 2; i += 2) {
