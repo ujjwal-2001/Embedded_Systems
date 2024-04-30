@@ -9,7 +9,7 @@ void save_to_txt2(float points[2][N-1], const char *filename);
 
 int main() {
     initialize();                       // step 1: initialize the global variables
-    strcpy(__EXPR__, "sin((3.14*x))");    // step 2: change the expression
+    strcpy(__EXPR__, "6");    // step 2: change the expression
     __X_MIN__ = -10;                    // step 3: change the minimum x value
     __X_MAX__ = 10;                     // step 4: change the maximum x value
     xy_vals();                          // step 5: generate x and y values
