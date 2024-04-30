@@ -383,6 +383,10 @@ void y_vals() {
     }
     __Y_MIN__ = min(__XY__[1], N);
     __Y_MAX__ = max(__XY__[1], N);
+    if(__Y_MIN__ == __Y_MAX__){
+        __Y_MIN__ -= MIN_Y_SPACE/2;
+        __Y_MAX__ += MIN_Y_SPACE/2;
+    }
 }
 
 void xy_vals() {
