@@ -6,9 +6,9 @@
 #include "evaluate.h"
 
 // GLOBAL VARIABLES
-char __EXPR__[EXP_LEN];                  // expression to be evaluated (x)
-char __EXPR_VAL__[EXP_LEN];              // expression to be evaluated (number)
-int __BRACKET_FLAG__;                    // flag to check if brackets are added
+char __EXPR__[EXP_LEN];                 // expression to be evaluated (x)
+char __EXPR_VAL__[EXP_LEN];             // expression to be evaluated (number)
+int __BRACKET_FLAG__;                   // flag to check if brackets are added
 float __X_MIN__;                        // minimum x value
 float __X_MAX__;                        // maximum x value
 float __Y_MIN__;                        // minimum y value                      
@@ -28,9 +28,11 @@ float __MAPPED_DY_DX__[2][N-1];         // derivative values
 float __INTEGRAL_XY__[2][N-1];          // integral values
 float __MAPPED_INTEGRAL_XY__[2][N-1];   // integral values
 float __AREA__;                         // __AREA__ under the curve
-float __BISECTION__[2][MAX_ZEROS*2];      // bisection points
-Stack __ZEROS__;                         // zeros of the function
-Stack __MAPPED_ZEROS__;                         // zeros of the function
+float __BISECTION__[2][MAX_ZEROS*2];    // bisection points
+float __MAXIMA_MINIMA__[2][MAX_MAXIMA_MINIMA];          // maxima and minima of the function
+float __MAPPED_MAXIMA_MINIMA__[2][MAX_MAXIMA_MINIMA];   // mapped maxima and minima of the function
+Stack __ZEROS__;                        // zeros of the function
+Stack __MAPPED_ZEROS__;                 // zeros of the function
 
 // INITIALIZATION
 void initialize() {
@@ -379,12 +381,8 @@ void y_vals() {
         val_replacer(__XY__[0][i]);
         __XY__[1][i] = eval(__EXPR_VAL__);
     }
-    __Y_MIN__ = min(__XY__[1], N);
-    __Y_MAX__ = max(__XY__[1], N);
-    if(__Y_MIN__ == __Y_MAX__){
-        __Y_MIN__ -= MIN_Y_SPACE/2.0;
-        __Y_MAX__ += MIN_Y_SPACE/2.0;
-    }
+    __Y_MIN__ = min(__XY__[1], N) - MIN_Y_SPACE/2.0;
+    __Y_MAX__ = max(__XY__[1], N) + MIN_Y_SPACE/2.0;
 }
 
 void xy_vals() {
@@ -523,6 +521,54 @@ void zeros_of_function() {
     }
 }
 
+// Calculate the maxima and minima of a function
+void maxima_minima_of_function() {
+
+    // Calculate the derivative
+    derivative();
+
+    // Clearing the Maxima and Minima
+    for (int i = 0; i < MAX_MAXIMA_MINIMA; i++) {
+        __MAXIMA_MINIMA__[0][i] = NAN;
+        __MAXIMA_MINIMA__[1][i] = NAN;
+        __MAPPED_MAXIMA_MINIMA__[0][i] = NAN;
+        __MAPPED_MAXIMA_MINIMA__[1][i] = NAN;
+    }
+
+    // Clearing the Maxima and Minima
+    for (int i = 0; i < MAX_MAXIMA_MINIMA; i++) {
+        __MAXIMA_MINIMA__[0][i] = NAN;
+        __MAXIMA_MINIMA__[1][i] = NAN;
+        __MAPPED_MAXIMA_MINIMA__[0][i] = NAN;
+        __MAPPED_MAXIMA_MINIMA__[1][i] = NAN;
+    }
+
+    // Find maxima and minima points at which __DY_DX__[1][i] changes sign
+    int j = 0;
+    float bisections_points[2][MAX_MAXIMA_MINIMA];
+    for (int i = 0; i < N - 2; i++) {
+        if (__DY_DX__[1][i] * __DY_DX__[1][i + 1] < 0) {
+            bisections_points[0][j] = __DY_DX__[0][i];
+            bisections_points[1][j] = __DY_DX__[1][i];
+            j++;
+        }
+    }
+
+    // Find maxima and minima - by approximation - average of the points at which __DY_DX__[1][i] changes sign
+    for (int i = 0; i < j - 1; i++) {
+        float x1 = bisections_points[0][i];
+        float x2 = bisections_points[0][i + 1];
+        float y1 = bisections_points[1][i];
+        float y2 = bisections_points[1][i + 1];
+        if (y1 * y2 < 0) {
+            float x_mid = (x1 + x2) / 2;
+            float y_mid = (y1 + y2) / 2;
+            __MAXIMA_MINIMA__[0][i] = x_mid;
+            __MAXIMA_MINIMA__[1][i] = y_mid;
+        }
+    }
+}
+
 //---------------MAPPING OF X AND Y VALUES TO SCREEN COORDINATES----------------
 
 // Find maximum value in an array of floats ignoring NaN and Inf values
@@ -618,6 +664,23 @@ void map_zeros() {
         float zero = __ZEROS__.items[i];
         float x = x_scale * zero + x_offset;
         push(&__MAPPED_ZEROS__, x);
+    }
+}
+
+// Map the maxima and minima of the function to screen coordinates - both x and y values
+void map_maxima_minima() {
+    float x_range = __X_MAX__ - __X_MIN__;
+    float y_range = __Y_MAX__ - __Y_MIN__;
+    float x_scale = (__MP_X2__-__MP_X1__) / x_range;
+    float y_scale = (__MP_Y2__-__MP_Y1__) / y_range;
+    float x_offset = __MP_X1__ - x_scale * __X_MIN__;
+    float y_offset = __MP_Y1__ - y_scale * __Y_MIN__;
+
+    for (int i = 0; i < MAX_MAXIMA_MINIMA; i++) {
+        if (!isnan(__MAXIMA_MINIMA__[0][i]) && !isnan(__MAXIMA_MINIMA__[1][i])) {
+            __MAPPED_MAXIMA_MINIMA__[0][i] = x_scale * __MAXIMA_MINIMA__[0][i] + x_offset;
+            __MAPPED_MAXIMA_MINIMA__[1][i] = y_scale * __MAXIMA_MINIMA__[1][i] + y_offset;
+        }
     }
 }
 
