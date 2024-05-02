@@ -51,8 +51,6 @@ void initialize() {
     __MP_Y1__ = 0;
     __MP_X2__ = 0;
     __MP_Y2__ = 0;
-    __ZOOMING__ = ZOOM_FACTOR;
-    __SHIFTING__ = SHIFT_FACTOR;
     for (int i = 0; i < N; i++) {
         __XY__[0][i] = 0;
         __XY__[1][i] = 0;
