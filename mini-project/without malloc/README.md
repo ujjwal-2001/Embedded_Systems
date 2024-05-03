@@ -13,8 +13,8 @@
 
 In this Project, we have built a scientific graphing tool on a touchscreen module as an embedded project, which has an enhanced user experience, i.e., portable and with touchscreens offering a more intuitive interface compared to traditional button-based input systems. Like the Desmos graphing calculator website,  we have built a similar utility hardware tool. Here, we have tried to accommodate the maximum features of the calculator by integrating a touchscreen through a microcontroller.
 
-<img src=".\Assets\main-panel.jpg" alt="Alt Text" width="700">
-<img src=".\Assets\first.jpg" alt="Alt Text" width="700">
+<img src=".\Assets\main-panel.jpg" alt="Alt Text" width="500">
+<img src=".\Assets\first.jpg" alt="Alt Text" width="500">
 
 ## Features
 
